@@ -1,24 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useLayoutEffect } from 'react';
 import { StyleSheet, SafeAreaView, Text, View, Image, SectionList, Button  } from 'react-native';
 import TaskItem from '@/components/TaskItem';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { NavigationContainer } from '@react-navigation/native';
-
-const Drawer = createDrawerNavigator();
+import { Picker } from '@react-native-picker/picker';
 
 
-export default function TaskPage({ navigation }) {
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => (
-        <Button onPress={() => navigation.openDrawer()} title="Filter" />
-      ),
-    });
-  }, [navigation]);
-
-  const [filter, setFilter] = useState(null);
+export default function TaskPage() {
   
   return (
     <SafeAreaView style={styles.content}>
@@ -27,16 +15,16 @@ export default function TaskPage({ navigation }) {
           sections={DATA}
           keyExtractor={(item, index) => item + index}
           renderItem={({ item, index, section }) => {
-            if (filter && item.title !== filter) {
-              return null;
-            }
+          if (filter && item.title !== filter) {
+            return null;
+          }
 
-            return (
-              <View style={index === section.data.length - 1 ? { marginBottom: 30 } : {}}>
-                <TaskItem title={item.title} date={item.date} />
-              </View>
-            );
-          }}
+          return (
+            <View style={index === section.data.length - 1 ? { marginBottom: 30 } : {}}>
+              <TaskItem title={item.title} date={item.date} />
+            </View>
+          );
+        }}
           renderSectionHeader={({ section: { title } }) => (
             <View>
               <ThemedText type='title'>{title}</ThemedText>
@@ -49,25 +37,6 @@ export default function TaskPage({ navigation }) {
   );
 }
 
-function CustomDrawerContent(props) {
-  const { navigation } = props;
-  const sectionTitles = DATA.map(section => section.title);
-
-  return (
-    <DrawerContentScrollView {...props}>
-      {sectionTitles.map(title => (
-        <DrawerItem
-          key={title}
-          label={title}
-          onPress={() => {
-            navigation.closeDrawer();
-            setFilter(title);
-          }}
-        />
-      ))}
-    </DrawerContentScrollView>
-  );
-}
 
 
 
