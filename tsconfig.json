@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "components/ExternalLink.js", "components/HelloWave.js", "components/ParallaxScrollView.tsx", "components/ThemedText.js", "components/ThemedView.js"  ]
+, "components/ExternalLink.js", "components/HelloWave.tsx", "components/ParallaxScrollView.tsx", "components/ThemedText.js", "components/ThemedView.js", "app/(tabs)/explore.js"  ]
 }

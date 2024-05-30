@@ -1,70 +1,128 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
+import React, { useState } from 'react';
+import { StyleSheet, SafeAreaView, Text, View, Image, SectionList, Button  } from 'react-native';
+import TaskItem from '@/components/TaskItem';
 import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/ThemedText';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { NavigationContainer } from '@react-navigation/native';
 
-export default function HomeScreen() {
+const Drawer = createDrawerNavigator();
+
+
+export default function TaskPage({ navigation }) {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <Button onPress={() => navigation.openDrawer()} title="Filter" />
+      ),
+    });
+  }, [navigation]);
+
+  const [filter, setFilter] = useState(null);
+  
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <SafeAreaView style={styles.content}>
+      <ThemedView style={styles.tasksContainer}>
+        <SectionList
+          sections={DATA}
+          keyExtractor={(item, index) => item + index}
+          renderItem={({ item, index, section }) => {
+            if (filter && item.title !== filter) {
+              return null;
+            }
+
+            return (
+              <View style={index === section.data.length - 1 ? { marginBottom: 30 } : {}}>
+                <TaskItem title={item.title} date={item.date} />
+              </View>
+            );
+          }}
+          renderSectionHeader={({ section: { title } }) => (
+            <View>
+              <ThemedText type='title'>{title}</ThemedText>
+            </View>
+          )}
+          stickySectionHeadersEnabled={false}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    </SafeAreaView>
   );
 }
 
+function CustomDrawerContent(props) {
+  const { navigation } = props;
+  const sectionTitles = DATA.map(section => section.title);
+
+  return (
+    <DrawerContentScrollView {...props}>
+      {sectionTitles.map(title => (
+        <DrawerItem
+          key={title}
+          label={title}
+          onPress={() => {
+            navigation.closeDrawer();
+            setFilter(title);
+          }}
+        />
+      ))}
+    </DrawerContentScrollView>
+  );
+}
+
+
+
+
+
+// Styles
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  tasksContainer: {
+    padding: 14,
     gap: 8,
   },
   stepContainer: {
     gap: 8,
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  content: {
+    flex: 1,
+    padding: 16,
+    gap: 16,
+    overflow: 'hidden',
   },
 });
+
+
+const DATA = [
+  {
+    title: "Today",
+    data: [
+      { title: "Task 1 is coming up and must be complete asap", date: "Today" },
+      { title: "Task 2 is coming up and must be complete asap", date: "Today" },
+      { title: "Task 3 is coming up and must be complete asap", date: "Today" }
+    ]
+  },
+  {
+    title: "Tomorrow",
+    data: [
+      { title: "Task 4 is coming up and must be complete asap", date: "Tomorrow" },
+      { title: "Task 5 is coming up and must be complete asap", date: "Tomorrow" },
+      { title: "Task 6 is coming up and must be complete asap", date: "Tomorrow" }
+    ]
+  },
+  {
+    title: "Next 7 Days",
+    data: [
+      { title: "Task 4 is coming up and must be complete asap", date: "Jun 1" },
+      { title: "Task 5 is coming up and must be complete asap", date: "Jun 3" },
+      { title: "Task 6 is coming up and must be complete asap", date: "Jun 5" }
+    ]
+  },
+  {
+    title: "Upcoming",
+    data: [
+      { title: "Task 4 is coming up and must be complete asap", date: "Aug 27" },
+      { title: "Task 5 is coming up and must be complete asap", date: "Sep 4" },
+      { title: "Task 6 is coming up and must be complete asap", date: "Sep 19" }
+    ]
+  }
+];

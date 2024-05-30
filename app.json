@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "ifn666_assessment_3",
+    "name": "Done",
     "slug": "ifn666_assessment_3",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "done",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
