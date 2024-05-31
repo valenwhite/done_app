@@ -1,6 +1,6 @@
 import BottomSheet, { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { useMemo, useRef } from 'react';
-import { View, StyleSheet, Text } from 'react-native'
+import { View, StyleSheet, Text, Button } from 'react-native'
 
 
 import { ThemedText } from '@/components/ThemedText';
@@ -12,7 +12,7 @@ export default function Calendar() {
 
   const snapPoints = useMemo(() => ["50%"], []);
 
-  const bottomSheetRef = useRef<BottomSheet>(null);
+  const bottomSheetRef = useRef(null);
 
   const handleClosePress = () => bottomSheetRef.current?.close();
   const handleOpenPress = () => bottomSheetRef.current?.expand();
@@ -21,7 +21,13 @@ export default function Calendar() {
   // renders
   return (
     <ThemedView style={styles.content}>
-      <BottomSheet snapPoints={snapPoints} handleComponent={null}>
+      <Button title="Open" onPress={handleOpenPress} />
+      <Button title="Close" onPress={handleClosePress} />
+      <BottomSheet 
+        ref={bottomSheetRef} 
+        snapPoints={snapPoints}
+        enablePanDownToClose={true}
+        >
         <View style={styles.contentContainer}>
           <BottomSheetTextInput value="Awesome 🎉" style={styles.textInput} />
         </View>
@@ -37,5 +43,10 @@ const styles = StyleSheet.create({
     padding: 32,
     gap: 16,
     overflow: 'hidden',
+  },
+  contentContainer: {
+    flex: 1,
+    padding: 16,
+    justifyContent: 'center',
   },
 });
