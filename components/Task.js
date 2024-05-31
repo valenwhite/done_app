@@ -27,7 +27,7 @@ const Task = ({ title, date, completeTask, index }) => {
       display: 'flex',
       flexDirection: 'row',
       backgroundColor: tintBackground,
-      padding: 16,
+      padding: 13,
       borderRadius: 10,
       gap: 16,
       justifyContent: 'space-between',

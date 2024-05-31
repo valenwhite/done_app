@@ -32,6 +32,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCaretUp } from '@fortawesome/free-solid-svg-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { HelloWave } from '@/components/HelloWave';
 
 
 export default function TaskPage() {
@@ -105,42 +106,53 @@ export default function TaskPage() {
   return (   
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={[styles.container, {backgroundColor: colorScheme === 'dark' ? '#000' : '#fff'}]}>
-
-        <View>
-          {todaysTasks.length > 0 && (
-            <ScrollView style={styles.tasksContainer}>
-              <ThemedText type='title' style={styles.sectionTitle}>Today's Tasks</ThemedText>
-              {todaysTasks.sort((a, b) => new Date(a.date) - new Date(b.date)).map((task, index) => (
-                <Task key={index} title={task.title} date={task.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} completeTask={completeTask} index={index} />
-              ))}
-            </ScrollView>
-          )}
-
-          {tomorrowsTasks.length > 0 && (
-            <ScrollView style={styles.tasksContainer}>
-              <ThemedText type='title' style={styles.sectionTitle}>Tomorrow's Tasks</ThemedText>
-              {tomorrowsTasks.sort((a, b) => new Date(a.date) - new Date(b.date)).map((task, index) => (
-                <Task key={index} title={task.title} date={task.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} completeTask={completeTask} index={index} />
-              ))}
-            </ScrollView>
-          )}
-
-          {futureTasks.length > 0 && (
-            <ScrollView style={styles.tasksContainer}>
-              <ThemedText type='title' style={styles.sectionTitle}>Future Tasks</ThemedText>
-              {futureTasks.sort((a, b) => new Date(a.date) - new Date(b.date)).map((task, index) => (
-                <Task key={index} title={task.title} date={task.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} completeTask={completeTask} index={index} />
-              ))}
-            </ScrollView>
-          )}
+        <View style={styles.headerContainer}>
+          <ThemedText type='title'>Hello, Valen</ThemedText>
+          <HelloWave/>
         </View>
+        {todaysTasks.length === 0 && tomorrowsTasks.length === 0 && futureTasks.length === 0 ? (
+          <ThemedView style={styles.emptyTasksContainer}>
+            <ThemedText type='title'>You're all caught up!</ThemedText>
+          </ThemedView>
+          ) : (
+          
+          <ScrollView style={styles.tasksContainer}>
+            <ThemedView>
+              {todaysTasks.length > 0 && (
+                <ThemedView>
+                  <ThemedText type='subtitle' style={styles.sectionTitle}>Today's Tasks</ThemedText>
+                  {todaysTasks.sort((a, b) => new Date(a.date) - new Date(b.date)).map((task, index) => (
+                    <Task key={index} title={task.title} date={task.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} completeTask={completeTask} index={index} />
+                  ))}
+                </ThemedView>
+              )}
 
+              {tomorrowsTasks.length > 0 && (
+                <View>
+                  <ThemedText type='subtitle' style={styles.sectionTitle}>Tomorrow's Tasks</ThemedText>
+                  {tomorrowsTasks.sort((a, b) => new Date(a.date) - new Date(b.date)).map((task, index) => (
+                    <Task key={index} title={task.title} date={task.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} completeTask={completeTask} index={index} />
+                  ))}
+                </View>
+              )}
+
+              {futureTasks.length > 0 && (
+                <View>
+                  <ThemedText type='subtitle' style={styles.sectionTitle}>Future Tasks</ThemedText>
+                  {futureTasks.sort((a, b) => new Date(a.date) - new Date(b.date)).map((task, index) => (
+                    <Task key={index} title={task.title} date={task.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} completeTask={completeTask} index={index} />
+                  ))}
+                </View>
+              )}
+            </ThemedView>
+          </ScrollView>
+        )}
         
-        <View style={styles.absoluteContainer}>
+        <ThemedView style={styles.absoluteContainer}>
           <TouchableOpacity onPress={handleOpenBottom} style={styles.addTaskWrapper}>
             <ThemedText type='title' style={{color: '#fff'}}>+</ThemedText>
           </TouchableOpacity>
-        </View>
+        </ThemedView>
       
         <BottomSheet
           ref={bottomSheetRef}
@@ -162,13 +174,13 @@ export default function TaskPage() {
               />
 
               <TouchableOpacity onPress={() => handleAddTask()}>
-                <View style={styles.submitTask}>
+                <ThemedView style={styles.submitTask}>
                   <FontAwesomeIcon icon={faCaretUp} color="#fff" />
-                </View>
+                </ThemedView>
               </TouchableOpacity>
             </View>
 
-            <View style={styles.dateSelector}>
+            <ThemedView style={styles.dateSelector}>
               <DateTimePicker
                 value={date}
                 mode={"date"}
@@ -176,7 +188,7 @@ export default function TaskPage() {
                 display="default"
                 onChange={onChange}
               />
-            </View>
+            </ThemedView>
               
           </KeyboardAvoidingView>
         </BottomSheet>
@@ -196,11 +208,25 @@ const styles = StyleSheet.create({
     flex: 1,
     overflow: 'hidden',
   },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    gap:  16,
+  },
+  emptyTasksContainer: {
+    display: 'flex',
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   tasksContainer: {
     display: 'flex',
     padding: 14,
   },
   sectionTitle: {
+    marginBottom: 10,
   },
   task: {
     marginBottom: 8,
