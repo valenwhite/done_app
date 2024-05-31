@@ -10,14 +10,13 @@ import { KeyboardAvoidingView } from 'react-native';
 import { TouchableOpacity, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheet } from '@gorhom/bottom-sheet';
 
+
 const test = () => {
   return (
     <SafeAreaView>
-      <AddTask/>
+      <Text>HI</Text>
     </SafeAreaView>
   )
 }
 
 export default test
-
-const styles = StyleSheet.create({})

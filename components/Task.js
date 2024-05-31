@@ -1,13 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 
-const Task = ({ title, date }) => {
+const Task = ({ title, date, completeTask, index }) => {
 
   const tintBackground= useThemeColor({}, 'tintBackground');
+
+  const [isChecked, setIsChecked] = useState(false);
+
+  const handleCheck = () => {
+    setIsChecked(!isChecked);
+    if (!isChecked) {
+      completeTask(index);
+    }
+  };
 
   const styles = StyleSheet.create({
     tasksContainer: {
@@ -46,7 +55,7 @@ const Task = ({ title, date }) => {
             iconStyle={{ borderColor: '#0a7ea4', borderRadius: 3 }}
             innerIconStyle={{ borderWidth: 2, borderRadius: 3 }}
             textStyle={{ fontFamily: "JosefinSans-Regular" }}
-            onPress={(isChecked: boolean) => {console.log(isChecked)}}
+            onPress={handleCheck}
             disableText={true}
           />
           <ThemedText type="defaultSemiBold" numberOfLines={1} ellipsizeMode='tail' style={styles.taskTitle}>{title}</ThemedText>
