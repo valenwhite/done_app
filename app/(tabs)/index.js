@@ -1,54 +1,95 @@
-import React, { useState, useLayoutEffect } from 'react';
-import { StyleSheet, SafeAreaView, View, Text, TextInput, Platform  } from 'react-native';
+// React imports
+import React, { useMemo, useRef, useCallback } from 'react';
+
+// React Native imports
+import { 
+  StyleSheet, 
+  SafeAreaView, 
+  View, 
+  Text, 
+  TextInput, 
+  Platform, 
+  Button, 
+  TouchableWithoutFeedback, 
+  Keyboard,
+  KeyboardAvoidingView 
+} from 'react-native';
+
+// Gesture handler imports
+import { TouchableOpacity, ScrollView } from 'react-native-gesture-handler';
+
+// Gorhom BottomSheet imports
+import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+
+// Local component imports
 import Task from '@/components/Task';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
-import { Picker } from '@react-native-picker/picker';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { KeyboardAvoidingView } from 'react-native';
-import { TouchableOpacity, GestureHandlerRootView } from 'react-native-gesture-handler';
-import { BottomSheet } from '@gorhom/bottom-sheet';
 
+// Hook imports
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 
 export default function TaskPage() {
+
+  const tasks = new Array(15).fill({
+    title: 'This is one of the tasks that needs to get done',
+    date: 'Today'
+  });
   
   const colorScheme = useColorScheme();
 
-  return (    
+  const snapPoints = useMemo(() => ["50%"], []);
+  const bottomSheetRef = useRef(null);
+  const handleOpenPress = () => bottomSheetRef.current?.expand();
+
+  const renderBackdrop = useCallback(
+    (props) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+      />
+    ),
+    []
+  );
+  return (   
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={[styles.container, {backgroundColor: colorScheme === 'dark' ? '#000' : '#fff'}]}>
 
-        <ThemedView style={styles.tasksContainer}>
-
+        <ScrollView style={styles.tasksContainer}>
           <ThemedText type='title'>Today's Tasks</ThemedText>
-
-
-          <Task title='This is one of the tasks that needs to get done' date='Today'/>
-          <Task title='This is one of the tasks that needs to get done' date='Today'/>
-          <Task title='This is one of the tasks that needs to get done' date='Today'/>
-
-          
-        </ThemedView>
+          {tasks.map((task, index) => (
+            <Task key={index} title={task.title} date={task.date} />
+          ))}
+        </ScrollView>
 
 
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.writeTaskWrapper}
         >
-          <TextInput style={[styles.input, {backgroundColor: colorScheme === 'dark' ? '#000' : '#fff'}]} placeholder={'Write a task'}/>
-
-          <TouchableOpacity >
-            <View style={styles.addWrapper}>
+          <TouchableOpacity onPress={handleOpenPress}>
+            <View style={styles.addTaskWrapper}>
               <ThemedText type='title' style={{color: '#fff'}}>+</ThemedText>
             </View>
           </TouchableOpacity>
         </KeyboardAvoidingView>
 
+        <BottomSheet
+          ref={bottomSheetRef}
+          snapPoints={snapPoints}
+          initialSnapIndex={-1} // This makes the sheet hidden at first
+          backdropComponent={renderBackdrop}
+        >
+          <TextInput 
+            style={[styles.input, {backgroundColor: colorScheme === 'dark' ? '#000' : '#fff'}]} 
+            placeholder={'Write a task'}
+          />
+        </BottomSheet>
       </SafeAreaView>
+    </TouchableWithoutFeedback> 
   );
 }
-
-
 
 
 
@@ -57,29 +98,20 @@ export default function TaskPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    gap: 16,
     overflow: 'hidden',
-    height: '100%',
-    backgroundColor: 'white',
   },
   tasksContainer: {
+    display: 'flex',
+    flex: 1,
     padding: 14,
-    gap: 12,
+    hieght: '110%',
+  },
+  task: {
+    marginBottom: 8,
   },
   stepContainer: {
     gap: 8,
     marginBottom: 8,
-  },
-    writeTaskWrapper: {
-    position: 'absolute',
-    bottom: 60,
-    width: '100%',
-    padding: 16,
-    gap: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
   },
   input: {
     paddingVertical: 15,
@@ -88,16 +120,17 @@ const styles = StyleSheet.create({
     
     borderRadius: 100,
   },
-  addWrapper: {
+  addTaskWrapper: {
     width: 70,
     height: 70,
+    position: 'absolute',
+    zIndex: 1,
+    bottom: 25,
+    right: 25,
     backgroundColor: '#0a7ea4',
     borderRadius: 60,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  addText: {
-    
   },
   sheetContainer: {
     flex: 1,
@@ -109,40 +142,15 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
+  content: {
+    flex: 1,
+    padding: 32,
+    gap: 16,
+    overflow: 'hidden',
+  },
+  contentContainer: {
+    flex: 1,
+    padding: 16,
+    justifyContent: 'center',
+  },
 });
-
-
-const DATA = [
-  {
-    title: "Today",
-    data: [
-      { title: "Task 1 is coming up and must be complete asap", date: "Today" },
-      { title: "Task 2 is coming up and must be complete asap", date: "Today" },
-      { title: "Task 3 is coming up and must be complete asap", date: "Today" }
-    ]
-  },
-  {
-    title: "Tomorrow",
-    data: [
-      { title: "Task 4 is coming up and must be complete asap", date: "Tomorrow" },
-      { title: "Task 5 is coming up and must be complete asap", date: "Tomorrow" },
-      { title: "Task 6 is coming up and must be complete asap", date: "Tomorrow" }
-    ]
-  },
-  {
-    title: "Next 7 Days",
-    data: [
-      { title: "Task 4 is coming up and must be complete asap", date: "Jun 1" },
-      { title: "Task 5 is coming up and must be complete asap", date: "Jun 3" },
-      { title: "Task 6 is coming up and must be complete asap", date: "Jun 5" }
-    ]
-  },
-  {
-    title: "Upcoming",
-    data: [
-      { title: "Task 4 is coming up and must be complete asap", date: "Aug 27" },
-      { title: "Task 5 is coming up and must be complete asap", date: "Sep 4" },
-      { title: "Task 6 is coming up and must be complete asap", date: "Sep 19" }
-    ]
-  }
-];

@@ -12,6 +12,7 @@ const Task = ({ title, date }) => {
   const styles = StyleSheet.create({
     tasksContainer: {
       display: 'flex',
+      marginBottom: 12,
     },
     taskDetails: {
       display: 'flex',
