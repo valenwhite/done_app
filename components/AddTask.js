@@ -34,7 +34,6 @@ export default function Calendar() {
   return (
     <ThemedView style={styles.content}>
       <Button title="Open" onPress={handleOpenPress} />
-      <Button title="Close" onPress={handleClosePress} />
       <BottomSheet 
         ref={bottomSheetRef} 
         snapPoints={snapPoints}
@@ -43,6 +42,7 @@ export default function Calendar() {
         backdropComponent={renderBackdrop} >
         <View style={styles.contentContainer}>
           <BottomSheetTextInput value="Awesome 🎉" style={styles.textInput} />
+          <Button title="Close" onPress={handleClosePress} />
         </View>
       </BottomSheet>
     </ThemedView>
