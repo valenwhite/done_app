@@ -1,15 +1,20 @@
 import express from 'express';
-import { getUser, getAllTasks, getTask, createTask, toggleTaskCompletion, deleteTask } from './server.js';
+import { getUser, getAllTasks, getTasks, createTask, toggleTaskCompletion, deleteTask } from './server.js';
 
 const app = express();
 
 app.use(express.json());
 
-app.get("/tasks", async (req, res) => {
-    const tasks = await getAllTasks();
-    res.send(tasks)
+app.get("/tasks/:id", async (req, res) => {
+    const { id } = req.params;
+    const tasks = await getTasks(id);
+    console.log(tasks);
+    res.send(tasks);
 });
 
+app.get("/test", async (req, res) => {
+    res.send({message: 'Its working'});
+});
 
 app.post("/tasks", async (req, res) => {
     const { userId, title, date } = req.body;
@@ -18,9 +23,10 @@ app.post("/tasks", async (req, res) => {
 });
 
 app.put("/tasks/:id", async (req, res) => {
-    const { id, complete } = req.params;
+    const { id } = req.params;
+    const { complete } = req.body;
     const updatedTask = await toggleTaskCompletion(id, complete);
-    res.send(updatedTask);
+    res.send({ id, complete });
 });
 
 app.delete("/tasks/:id", async (req, res) => {

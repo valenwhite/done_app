@@ -5,16 +5,32 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 
-const Task = ({ title, date, completeTask, index }) => {
+const Task = ({  id, title, date, complete, updateTaskInState }) => {
 
   const tintBackground= useThemeColor({}, 'tintBackground');
+  
+  const completeTask = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/tasks/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ complete: complete === 1 ? 0 : 1 }),
+      });
 
-  const [isChecked, setIsChecked] = useState(false);
+      if (!response.ok) {
+        throw new Error('HTTP error ' + response.status);
+      }
+      const text = await response.json();
 
-  const handleCheck = () => {
-    setIsChecked(!isChecked);
-    if (!isChecked) {
-      completeTask(index);
+      if (text) {
+        const updatedCompleteStatus = parseInt(text.complete, 10);
+        const updatedTask = { id, title, date, complete: updatedCompleteStatus };
+        updateTaskInState(updatedTask);
+      }
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
@@ -55,8 +71,9 @@ const Task = ({ title, date, completeTask, index }) => {
             iconStyle={{ borderColor: '#0a7ea4', borderRadius: 3 }}
             innerIconStyle={{ borderWidth: 2, borderRadius: 3 }}
             textStyle={{ fontFamily: "JosefinSans-Regular" }}
-            onPress={handleCheck}
             disableText={true}
+            onPress={() => completeTask(id)}
+            isChecked={complete === 1}
           />
           <ThemedText type="defaultSemiBold" numberOfLines={1} ellipsizeMode='tail' style={styles.taskTitle}>{title}</ThemedText>
           <ThemedText type="link">{date}</ThemedText>

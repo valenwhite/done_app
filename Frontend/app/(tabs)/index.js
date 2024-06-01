@@ -1,5 +1,5 @@
 // React imports
-import React, { useMemo, useRef, useCallback, useState } from 'react';
+import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
 
 // React Native imports
 import { 
@@ -50,12 +50,28 @@ const isFuture = (date) => {
 };
 const isOverdue = (date) => new Date(date).setHours(0,0,0,0) < new Date().setHours(0,0,0,0);
 
-
+const userId = 1;
 
 
 
 export default function TaskPage() {
- 
+
+  useEffect(() => {
+  fetch('http://localhost:8080/tasks/1')
+    .then(res => res.json())
+    .then(data => {
+      const tasksWithDateObjects = data.map(task => ({
+        ...task,
+        date: new Date(task.date)
+      }));
+      setTasks(tasksWithDateObjects);
+    })
+    .catch(err => console.log('Error:', err))
+  }, [])
+
+
+
+  const [tasks, setTasks] = useState([]);
   const [task, setTask] = useState();
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState('date');
@@ -65,16 +81,9 @@ export default function TaskPage() {
     setDate(currentDate);
   };
 
-  const [taskItems, setTaskItems] = useState([]);
-
   const addTask = (title, date) => {
-    setTaskItems(prevTaskItems => [...prevTaskItems, { title, date }]);
+    setTasks(prevtasks => [...prevtasks, { title, date }]);
   };
-
-  const todaysTasks = useMemo(() => taskItems.filter(task => isToday(task.date)), [taskItems]);
-  const tomorrowsTasks = useMemo(() => taskItems.filter(task => isTomorrow(task.date)), [taskItems]);
-  const futureTasks = useMemo(() => taskItems.filter(task => isFuture(task.date)), [taskItems]);
-  const overdueTasks = useMemo(() => taskItems.filter(task => isOverdue(task.date)), [taskItems]);
 
   const handleOpenBottom = () => {
     bottomSheetRef.current?.expand();
@@ -85,14 +94,8 @@ export default function TaskPage() {
     bottomSheetRef.current?.close();
     console.log(task);
     console.log(date);
-    setTaskItems(prevTaskItems => [...prevTaskItems, { title: task, date: date }]);
+    setTasks(prevtasks => [...prevtasks, { title: task, date: date }]);
     setTask(null);
-  }
-
-  const completeTask =(index) => {
-    let itemsCopy = [...taskItems];
-    itemsCopy.splice(index, 1);
-    setTaskItems(itemsCopy);
   }
   
   const colorScheme = useColorScheme();
@@ -112,78 +115,84 @@ export default function TaskPage() {
     []
   );
 
+const updateTaskInState = (updatedTask) => {
+  console.log('Updating task in state', updatedTask);
+
+  console.log('Tasks before update:', tasks);
+
+  console.log('Complete value in updatedTask:', updatedTask.complete);
+
+  setTasks(tasks.map(task => 
+    task.task_id === updatedTask.id 
+      ? { ...task, complete: updatedTask.complete } 
+      : task
+  ));
+};
+
+
   const filterOptions = ['All', 'Today', 'Tomorrow', 'Overdue', 'Completed'];
+
+  const [selectedFilter, setSelectedFilter] = useState('All');
+
+  const filteredTasks = tasks.filter(task => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const taskDate = new Date(task.date);
+    taskDate.setHours(0, 0, 0, 0);
+
+    switch (selectedFilter) {
+      case 'Today':
+        return taskDate.getTime() === today.getTime() && task.complete !== 1;
+      case 'Tomorrow':
+        return taskDate.getTime() === tomorrow.getTime() && task.complete !== 1;
+      case 'Overdue':
+        return taskDate.getTime() < today.getTime() && task.complete !== 1;
+      case 'Completed':
+        return task.complete === 1;
+      default:
+        // if 'All' or any other value is selected, return all tasks
+        return task.complete !== 1;
+    }
+  });
 
   return (   
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={[styles.container, {backgroundColor: colorScheme === 'dark' ? '#000' : '#fff'}]}>
-
         <View style={styles.headerContainer}>
           <View style={styles.welcomeContainer}>
             <ThemedText type='title'>Hello, Valen</ThemedText>
             <HelloWave/>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} >
-            <View style={styles.filterContainer}>
-              {filterOptions.map((option) => (
-                <Pressable key={option} style={styles.filterOption}>
-                  <Text style={styles.filterTitle}>{option}</Text>
-                </Pressable>
-              ))}
-            </View>
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterContainer}>
+            {filterOptions.map((option) => (
+              <Pressable 
+                key={option} 
+                style={[
+                  styles.filterOption, 
+                  selectedFilter === option ? styles.selectedFilter : null
+                ]}
+                onPress={() => setSelectedFilter(option)}
+              >
+                <Text style={styles.filterTitle}>{option}</Text>
+              </Pressable>
+            ))}
           </ScrollView>
         </View>
 
 
-
-        {todaysTasks.length === 0 && tomorrowsTasks.length === 0 && futureTasks.length === 0 ? (
-          <ThemedView style={styles.emptyTasksContainer}>
-            <ThemedText type='title'>You're all caught up!</ThemedText>
-          </ThemedView>
-          ) : (
-          
-          <ScrollView style={styles.tasksContainer}>
-          
-
-            <ThemedView>
-              {overdueTasks.length > 0 && (
-                <View>
-                  <ThemedText type='subtitle' style={styles.sectionTitle}>Overdue Tasks</ThemedText>
-                  {overdueTasks.sort((a, b) => new Date(a.date) - new Date(b.date)).map((task, index) => (
-                    <Task key={index} title={task.title} date={task.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} completeTask={completeTask} index={index} />
-                  ))}
-                </View>
-              )}
-
-              {todaysTasks.length > 0 && (
-                <ThemedView>
-                  <ThemedText type='subtitle' style={styles.sectionTitle}>Today's Tasks</ThemedText>
-                  {todaysTasks.sort((a, b) => new Date(a.date) - new Date(b.date)).map((task, index) => (
-                    <Task key={index} title={task.title} date={task.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} completeTask={completeTask} index={index} />
-                  ))}
-                </ThemedView>
-              )}
-
-              {tomorrowsTasks.length > 0 && (
-                <View>
-                  <ThemedText type='subtitle' style={styles.sectionTitle}>Tomorrow's Tasks</ThemedText>
-                  {tomorrowsTasks.sort((a, b) => new Date(a.date) - new Date(b.date)).map((task, index) => (
-                    <Task key={index} title={task.title} date={task.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} completeTask={completeTask} index={index} />
-                  ))}
-                </View>
-              )}
-
-              {futureTasks.length > 0 && (
-                <View>
-                  <ThemedText type='subtitle' style={styles.sectionTitle}>Future Tasks</ThemedText>
-                  {futureTasks.sort((a, b) => new Date(a.date) - new Date(b.date)).map((task, index) => (
-                    <Task key={index} title={task.title} date={task.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} completeTask={completeTask} index={index} />
-                  ))}
-                </View>
-              )}
-            </ThemedView>
+        <View style={styles.taskContainer}>
+          <ScrollView>
+            {filteredTasks.map(task => (
+              <Task key={task.task_id} id={task.task_id} title={task.title} date={task.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} complete={task.complete} updateTaskInState={updateTaskInState}/>
+            ))}
           </ScrollView>
-        )}
+        </View>
+
         
         <ThemedView style={styles.absoluteContainer}>
           <TouchableOpacity onPress={handleOpenBottom} style={styles.addTaskWrapper}>
@@ -250,45 +259,39 @@ const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: 'column',
     padding: 14,
-    gap:  16,
   },
   welcomeContainer: {
     flexDirection: 'row',
-    gap: 16,
+    marginBottom: 16,
   },
   filterContainer: {
     flexDirection: 'row',
     gap: 16,
   },
   filterOption: {
-    backgroundColor: '#0a7ea4',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
+    backgroundColor: '#58a9c4',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
     borderRadius: 25,
+    marginRight: 8,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  selectedFilter: {
+    backgroundColor: '#0a7ea4', // change this to the color you want
   },
   filterTitle: {
     color: 'white'
   },
-  emptyTasksContainer: {
-    display: 'flex',
+  taskContainer: {
     flex: 1,
     flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  tasksContainer: {
-    display: 'flex',
     padding: 14,
-  },
-  sectionTitle: {
-    marginBottom: 10,
+    height: '100%',
   },
   task: {
     marginBottom: 8,
   },
-  
   writeTaskWrapper: {
     flexDirection: 'row',
     paddingTop: 0,
@@ -328,7 +331,8 @@ const styles = StyleSheet.create({
     height: 70,
     justifyContent: 'flex-end',
     alignItems: 'flex-end',
-    padding: 30, // Adjust this value as needed for your layout
+    padding: 30,
+    backgroundColor: 'transparent', // Adjust this value as needed for your layout
   },
   addTaskWrapper: {
     width: 70,

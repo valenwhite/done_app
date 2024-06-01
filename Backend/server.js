@@ -74,7 +74,7 @@ export async function toggleTaskCompletion(id, complete) {
         SET complete = ?
         WHERE task_id = ?
         `, [complete, id]);
-    return result.affectedRows;
+    return result.complete;
 };
 
 export async function deleteTask(id) {
