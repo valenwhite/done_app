@@ -36,12 +36,6 @@ import { HelloWave } from '@/components/HelloWave';
 
 
 export default function TaskPage() {
-
-  const tasks = new Array(5).fill({
-    title: 'This is one of the tasks that needs to get done',
-    date: 'Today'
-  });
-
  
   const [task, setTask] = useState();
   const [date, setDate] = useState(new Date());
@@ -54,6 +48,7 @@ export default function TaskPage() {
 
   const [taskItems, setTaskItems] = useState([]);
 
+ 
   const todaysTasks = taskItems.filter(task => new Date(task.date).setHours(0,0,0,0) === new Date().setHours(0,0,0,0));
   const tomorrowsTasks = taskItems.filter(task => {
     const tomorrow = new Date();
@@ -116,7 +111,10 @@ export default function TaskPage() {
           ) : (
           
           <ScrollView style={styles.tasksContainer}>
+          
+
             <ThemedView>
+
               {todaysTasks.length > 0 && (
                 <ThemedView>
                   <ThemedText type='subtitle' style={styles.sectionTitle}>Today's Tasks</ThemedText>
@@ -159,14 +157,17 @@ export default function TaskPage() {
           initialSnapIndex={-1} // This makes the sheet hidden at first
           backdropComponent={renderBackdrop}
           styles={styles.bottomContainer}
+          backgroundStyle={{backgroundColor: colorScheme === 'dark' ? '#1f1f1f' : '#fff'}}
           handleIndicatorStyle={{ display: "none" }}
         >
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           >
             <View style={styles.writeTaskWrapper}>
               <TextInput 
-                style={[styles.input, {backgroundColor: colorScheme === 'dark' ? '#000' : '#fff'}]} 
-                placeholder={'Write a task'}
+                style={styles.input} 
+                placeholder={'What do you need to do?'}
+                placeholderTextColor={'#787878'}
+                color={colorScheme === 'dark' ? '#fff' : '#000'}
                 onChangeText={text => setTask(text)}
                 value={task}
                 ref={inputRef}
@@ -179,7 +180,7 @@ export default function TaskPage() {
               </TouchableOpacity>
             </View>
 
-            <ThemedView style={styles.dateSelector}>
+            <View style={styles.dateSelector}>
               <DateTimePicker
                 value={date}
                 mode={"date"}
@@ -187,7 +188,7 @@ export default function TaskPage() {
                 display="default"
                 onChange={onChange}
               />
-            </ThemedView>
+            </View>
               
           </KeyboardAvoidingView>
         </BottomSheet>
@@ -246,6 +247,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 100,
     fontSize: 18,
+    backgroundColor: 'transparent',
   },
   dateSelector: {
     marginTop: 16,
