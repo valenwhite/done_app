@@ -31,7 +31,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCaretUp } from '@fortawesome/free-solid-svg-icons';
+import { faCaretUp,faSquareCheck } from '@fortawesome/free-solid-svg-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { HelloWave } from '@/components/HelloWave';
 
@@ -187,9 +187,17 @@ const updateTaskInState = (updatedTask) => {
 
         <View style={styles.taskContainer}>
           <ScrollView>
-            {filteredTasks.map(task => (
-              <Task key={task.task_id} id={task.task_id} title={task.title} date={task.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} complete={task.complete} updateTaskInState={updateTaskInState}/>
-            ))}
+            {filteredTasks.length > 0 ? (
+              filteredTasks.map(task => (
+                <Task key={task.task_id} id={task.task_id} title={task.title} date={task.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} complete={task.complete} updateTaskInState={updateTaskInState}/>
+              ))
+            ) : (
+              <ThemedView style={styles.noTask}>
+                <FontAwesomeIcon icon={faSquareCheck} color="#0a7ea4" size='50' />
+                <ThemedText type='subtitle'>All tasks complete!</ThemedText>
+              </ThemedView>
+
+            )}
           </ScrollView>
         </View>
 
@@ -291,6 +299,13 @@ const styles = StyleSheet.create({
   },
   task: {
     marginBottom: 8,
+  },
+  noTask: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: '60%',
+    gap: 12,
   },
   writeTaskWrapper: {
     flexDirection: 'row',
