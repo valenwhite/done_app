@@ -12,7 +12,8 @@ import {
   Button, 
   TouchableWithoutFeedback, 
   Keyboard,
-  KeyboardAvoidingView 
+  KeyboardAvoidingView, 
+  Pressable
 } from 'react-native';
 
 // Gesture handler imports
@@ -35,6 +36,24 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { HelloWave } from '@/components/HelloWave';
 
 
+// Extract date comparison functions
+const isToday = (date) => new Date(date).setHours(0,0,0,0) === new Date().setHours(0,0,0,0);
+const isTomorrow = (date) => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return new Date(date).setHours(0,0,0,0) === tomorrow.setHours(0,0,0,0);
+};
+const isFuture = (date) => {
+  const dayAfterTomorrow = new Date();
+  dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
+  return new Date(date).setHours(0,0,0,0) >= dayAfterTomorrow.setHours(0,0,0,0);
+};
+const isOverdue = (date) => new Date(date).setHours(0,0,0,0) < new Date().setHours(0,0,0,0);
+
+
+
+
+
 export default function TaskPage() {
  
   const [task, setTask] = useState();
@@ -48,18 +67,14 @@ export default function TaskPage() {
 
   const [taskItems, setTaskItems] = useState([]);
 
- 
-  const todaysTasks = taskItems.filter(task => new Date(task.date).setHours(0,0,0,0) === new Date().setHours(0,0,0,0));
-  const tomorrowsTasks = taskItems.filter(task => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return new Date(task.date).setHours(0,0,0,0) === tomorrow.setHours(0,0,0,0);
-  });
-  const futureTasks = taskItems.filter(task => {
-    const dayAfterTomorrow = new Date();
-    dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
-    return new Date(task.date).setHours(0,0,0,0) >= dayAfterTomorrow.setHours(0,0,0,0);
-  });
+  const addTask = (title, date) => {
+    setTaskItems(prevTaskItems => [...prevTaskItems, { title, date }]);
+  };
+
+  const todaysTasks = useMemo(() => taskItems.filter(task => isToday(task.date)), [taskItems]);
+  const tomorrowsTasks = useMemo(() => taskItems.filter(task => isTomorrow(task.date)), [taskItems]);
+  const futureTasks = useMemo(() => taskItems.filter(task => isFuture(task.date)), [taskItems]);
+  const overdueTasks = useMemo(() => taskItems.filter(task => isOverdue(task.date)), [taskItems]);
 
   const handleOpenBottom = () => {
     bottomSheetRef.current?.expand();
@@ -86,7 +101,6 @@ export default function TaskPage() {
   const bottomSheetRef = useRef(null);
   const inputRef = useRef(null);
 
-
   const renderBackdrop = useCallback(
     (props) => (
       <BottomSheetBackdrop
@@ -97,13 +111,31 @@ export default function TaskPage() {
     ),
     []
   );
+
+  const filterOptions = ['All', 'Today', 'Tomorrow', 'Overdue', 'Completed'];
+
   return (   
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={[styles.container, {backgroundColor: colorScheme === 'dark' ? '#000' : '#fff'}]}>
+
         <View style={styles.headerContainer}>
-          <ThemedText type='title'>Hello, Valen</ThemedText>
-          <HelloWave/>
+          <View style={styles.welcomeContainer}>
+            <ThemedText type='title'>Hello, Valen</ThemedText>
+            <HelloWave/>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} >
+            <View style={styles.filterContainer}>
+              {filterOptions.map((option) => (
+                <Pressable key={option} style={styles.filterOption}>
+                  <Text style={styles.filterTitle}>{option}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </ScrollView>
         </View>
+
+
+
         {todaysTasks.length === 0 && tomorrowsTasks.length === 0 && futureTasks.length === 0 ? (
           <ThemedView style={styles.emptyTasksContainer}>
             <ThemedText type='title'>You're all caught up!</ThemedText>
@@ -114,6 +146,14 @@ export default function TaskPage() {
           
 
             <ThemedView>
+              {overdueTasks.length > 0 && (
+                <View>
+                  <ThemedText type='subtitle' style={styles.sectionTitle}>Overdue Tasks</ThemedText>
+                  {overdueTasks.sort((a, b) => new Date(a.date) - new Date(b.date)).map((task, index) => (
+                    <Task key={index} title={task.title} date={task.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} completeTask={completeTask} index={index} />
+                  ))}
+                </View>
+              )}
 
               {todaysTasks.length > 0 && (
                 <ThemedView>
@@ -206,13 +246,30 @@ export default function TaskPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    overflow: 'hidden',
   },
   headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: 'column',
     padding: 14,
     gap:  16,
+  },
+  welcomeContainer: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  filterOption: {
+    backgroundColor: '#0a7ea4',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterTitle: {
+    color: 'white'
   },
   emptyTasksContainer: {
     display: 'flex',
