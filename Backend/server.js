@@ -1,23 +1,31 @@
-const express = require('express');
-const mysql = require('mysql');
-const cors = require('cors');
+import mysql from 'mysql2';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const app = express();
-app.use(cors());
+const pool = mysql.createPool({
+    host: process.env.MYSQL_HOST,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE
+}).promise();
+
+const userId = 1;
+
+async function getTasks(user_id) {
+    const [rows] = await pool.query(`SELECT * FROM tasks WHERE user_id = ${user_id}`);
+    return rows;
+};
+
+const tasks = await getTasks(userId);
+console.log(tasks);
 
 
-app.get('/', (re, res) => {
-    return res.json('From Backend Side')
-})
+async function getUser(user_id) {
+    const [rows] = await pool.query(`SELECT * FROM users WHERE user_id = ${user_id}`);
+    return rows;
+};
 
-app.get('/users', (re, res) => {
-    const sql = "SELECT * FROM users";
-    db.query(sql, (err, result) => {
-        if (err) throw err;
-        res.json(result);
-    })
-})
+const user = await getUser(userId);
+console.log(user);
 
-app.listen(8806, () => {
-    console.log('Listening');
-})
+
