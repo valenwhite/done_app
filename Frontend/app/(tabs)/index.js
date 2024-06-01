@@ -43,7 +43,6 @@ export default function TaskPage() {
   });
 
  
-
   const [task, setTask] = useState();
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState('date');

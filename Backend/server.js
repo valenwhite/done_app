@@ -9,23 +9,79 @@ const pool = mysql.createPool({
     database: process.env.MYSQL_DATABASE
 }).promise();
 
-const userId = 1;
 
-async function getTasks(user_id) {
-    const [rows] = await pool.query(`SELECT * FROM tasks WHERE user_id = ${user_id}`);
+// User Functions
+
+export async function getUser(id) {
+    const [rows] = await pool.query(`
+        SELECT * 
+        FROM users 
+        WHERE user_id = ?
+        `, [id]);
     return rows;
 };
 
-const tasks = await getTasks(userId);
-console.log(tasks);
+export async function createUser(name, email, password) {
+    const result = await pool.query(`
+        INSERT INTO users (name, email, pasword) 
+        VALUES (?, ?, ?)
+        `, [name, email, password]);
+        const id =result.insertId;
+    return getUser(id);
+};
 
 
-async function getUser(user_id) {
-    const [rows] = await pool.query(`SELECT * FROM users WHERE user_id = ${user_id}`);
+// Task Related Fucntions
+
+export async function getAllTasks() {
+    const [rows] = await pool.query(`
+        SELECT * 
+        FROM tasks 
+        `);
     return rows;
 };
 
-const user = await getUser(userId);
-console.log(user);
+export async function getTasks(id) {
+    const [rows] = await pool.query(`
+        SELECT * 
+        FROM tasks 
+        WHERE user_id = ?
+        `, [id]);
+    return rows;
+};
 
+export async function getTask(id) {
+    const [rows] = await pool.query(`
+        SELECT * 
+        FROM tasks 
+        WHERE task_id = ?
+        `, [id]);
+    return rows[0];
+};
+
+export async function createTask(userId, title, date) {
+    const result = await pool.query(`
+        INSERT INTO tasks (user_id, title, date) 
+        VALUES (?, ?, ?)
+        `, [userId, title, date]);
+        const id =result.insertId;
+    return getNote(id);
+};
+
+export async function toggleTaskCompletion(id, complete) {
+    const result = await pool.query(`
+        UPDATE tasks 
+        SET complete = ?
+        WHERE task_id = ?
+        `, [complete, id]);
+    return result.affectedRows;
+};
+
+export async function deleteTask(id) {
+    const result = await pool.query(`
+        DELETE FROM tasks 
+        WHERE task_id = ?
+        `, [id]);
+    return result.affectedRows;
+};
 
