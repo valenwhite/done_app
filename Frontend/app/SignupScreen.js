@@ -1,34 +1,45 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 
-const SignupScreen = ({ navigation }) => {
-  const [username, setUsername] = useState('');
+export default function SignupScreen({ navigation }) {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSignup = () => {
-    // Add signup logic here
-    navigation.navigate('Login');
+    // Handle signup logic here
+    // For simplicity, we'll assume the signup is successful
+    navigation.replace('Main');
   };
 
   return (
     <View style={styles.container}>
-      <TextInput 
-        placeholder="Username" 
-        value={username} 
-        onChangeText={setUsername} 
-        style={styles.input} 
+      <Text style={styles.title}>Sign Up</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Name"
+        value={name}
+        onChangeText={setName}
       />
-      <TextInput 
-        placeholder="Password" 
-        value={password} 
-        onChangeText={setPassword} 
-        secureTextEntry 
-        style={styles.input} 
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
       />
       <Button title="Sign Up" onPress={handleSignup} />
+      <Button title="Already have an account? Log In" onPress={() => navigation.navigate('Login')} />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -36,13 +47,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 16,
   },
+  title: {
+    fontSize: 24,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
   input: {
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
     marginBottom: 12,
-    padding: 8,
+    paddingHorizontal: 8,
   },
 });
-
-export default SignupScreen;

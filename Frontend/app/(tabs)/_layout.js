@@ -1,5 +1,5 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
+import { Tabs } from 'expo-router';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTasks, faCalendarAlt, faUser } from '@fortawesome/free-solid-svg-icons';
 import { Colors } from '@/constants/Colors';
@@ -36,7 +36,7 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="test"
+          name="profile"
           options={{
             title: '',
             tabBarIcon: ({ color, focused }) => (
