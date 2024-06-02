@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useContext, useState, useRef } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -7,18 +7,19 @@ import Task from '@/components/Task';
 import TaskBottomSheet from '@/components/TaskBottomSheet';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faSquareCheck } from '@fortawesome/free-solid-svg-icons';
+import { TasksContext } from '@/contexts/TasksContext';
 
 // Date comparison functions
-const isToday = (date) => new Date(date).setHours(0,0,0,0) === new Date().setHours(0,0,0,0);
+const isToday = (date) => new Date(date).setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0);
 const isTomorrow = (date) => {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  return new Date(date).setHours(0,0,0,0) === tomorrow.setHours(0,0,0,0);
+  return new Date(date).setHours(0, 0, 0, 0) === tomorrow.setHours(0, 0, 0, 0);
 };
-const isOverdue = (date) => new Date(date).setHours(0,0,0,0) < new Date().setHours(0,0,0,0);
+const isOverdue = (date) => new Date(date).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0);
 
 const TaskPage = () => {
-  const [tasks, setTasks] = useState([]);
+  const { tasks, setTasks, updateTask, deleteTask } = useContext(TasksContext);
   const [task, setTask] = useState('');
   const [date, setDate] = useState(new Date());
   const [selectedFilter, setSelectedFilter] = useState('All');
@@ -27,24 +28,6 @@ const TaskPage = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const bottomSheetRef = useRef(null);
-
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const res = await fetch('http://localhost:8080/tasks/1');
-        const data = await res.json();
-        const tasksWithDateObjects = data.map(task => ({
-          ...task,
-          date: new Date(task.date)
-        }));
-        setTasks(tasksWithDateObjects);
-      } catch (err) {
-        console.log('Error:', err);
-      }
-    };
-
-    fetchTasks();
-  }, []);
 
   const resetForm = () => {
     setTask('');

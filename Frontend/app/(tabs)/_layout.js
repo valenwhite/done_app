@@ -24,7 +24,7 @@ export default function TabLayout() {
         name="home"
         component={IndexScreen}
         options={{
-          title: 'Home',
+          title: '',
           tabBarIcon: ({ color, focused }) => (
             <FontAwesomeIcon icon={faTasks} color={color} size={focused ? 25 : 20} />
           ),
@@ -34,7 +34,7 @@ export default function TabLayout() {
         name="calendar"
         component={CalendarScreen}
         options={{
-          title: 'Calendar',
+          title: '',
           tabBarIcon: ({ color, focused }) => (
             <FontAwesomeIcon icon={faCalendarAlt} color={color} size={focused ? 25 : 20} />
           ),
@@ -44,7 +44,7 @@ export default function TabLayout() {
         name="profile"
         component={ProfileScreen}
         options={{
-          title: 'Profile',
+          title: '',
           tabBarIcon: ({ color, focused }) => (
             <FontAwesomeIcon icon={faUser} color={color} size={focused ? 25 : 20} />
           ),

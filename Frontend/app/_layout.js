@@ -8,7 +8,7 @@ import { AuthProvider, useAuth } from '../AuthContext';
 import { TasksProvider } from '@/contexts/TasksContext';
 import LoginScreen from './login';
 import SignupScreen from './signup';
-import TabLayout from './(tabs)/_layout'; // Adjust this path as needed
+import TabLayout from './(tabs)/_layout'; // Ensure this path is correct
 
 SplashScreen.preventAutoHideAsync();
 

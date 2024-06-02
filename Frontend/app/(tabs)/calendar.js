@@ -4,6 +4,7 @@ import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { TasksContext } from '@/contexts/TasksContext';
 import TaskBottomSheet from '@/components/TaskBottomSheet';
 import Task from '@/components/Task';
@@ -18,7 +19,7 @@ LocaleConfig.locales['en'] = {
 LocaleConfig.defaultLocale = 'en';
 
 const CalendarPage = () => {
-  const { tasks, setTasks } = useContext(TasksContext);
+  const { tasks, setTasks, updateTask, deleteTask } = useContext(TasksContext);
   const [selectedDate, setSelectedDate] = useState('');
   const [task, setTask] = useState('');
   const [date, setDate] = useState(new Date());
@@ -71,7 +72,7 @@ const CalendarPage = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={[styles.container, { backgroundColor: colorScheme === 'dark' ? '#000' : '#fff' }]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: useThemeColor({}, 'background') }]}>
         <ThemedView style={styles.welcomeContainer}>
           <ThemedText type='title'>Calendar</ThemedText>
         </ThemedView>
