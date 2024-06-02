@@ -14,7 +14,6 @@ export default function LoginScreen({ navigation }) {
     // Handle login logic here
     // For simplicity, we'll assume the login is successful
     login();
-    navigation.navigate('(tabs)');
   };
 
   return (

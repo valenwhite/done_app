@@ -7,7 +7,7 @@ import { faCaretUp, faTrash, faPencilAlt } from '@fortawesome/free-solid-svg-ico
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { ThemedView } from '@/components/ThemedView';
 
-const AddTaskBottomSheet = ({ 
+const TaskBottomSheet = ({ 
   bottomSheetRef, 
   task, 
   setTask, 
@@ -107,7 +107,7 @@ const AddTaskBottomSheet = ({
     <BottomSheet
       ref={bottomSheetRef}
       snapPoints={snapPoints}
-      initialSnapIndex={-1}
+      initialSnapIndex={-1} // Keeps the bottom sheet closed initially
       backdropComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: colorScheme === 'dark' ? '#1f1f1f' : '#fff' }}
       handleIndicatorStyle={{ display: "none" }}
@@ -208,4 +208,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddTaskBottomSheet;
+export default TaskBottomSheet;
