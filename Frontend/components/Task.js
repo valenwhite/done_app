@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Pressable } from 'react-native';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
+import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 
 const Task = ({  id, title, date, complete, updateTaskInState }) => {
 
@@ -62,23 +63,29 @@ const Task = ({  id, title, date, complete, updateTaskInState }) => {
   });
 
   return (
-    <View style={styles.tasksContainer}>
-        <ThemedView style={styles.taskDetails}>
-          <BouncyCheckbox
-            size={25}
-            fillColor='#0a7ea4'
-            unFillColor="#FFFFFF"
-            iconStyle={{ borderColor: '#0a7ea4', borderRadius: 3 }}
-            innerIconStyle={{ borderWidth: 2, borderRadius: 3 }}
-            textStyle={{ fontFamily: "JosefinSans-Regular" }}
-            disableText={true}
-            onPress={() => completeTask(id)}
-            isChecked={complete === 1}
-          />
-          <ThemedText type="defaultSemiBold" numberOfLines={1} ellipsizeMode='tail' style={styles.taskTitle}>{title}</ThemedText>
-          <ThemedText type="link">{date}</ThemedText>
-        </ThemedView>
-    </View>
+    <Pressable>
+      <View style={styles.tasksContainer}>
+          <ThemedView style={styles.taskDetails}>
+            <BouncyCheckbox
+              size={25}
+              fillColor='#0a7ea4'
+              unFillColor="#FFFFFF"
+              iconStyle={{ borderColor: '#0a7ea4', borderRadius: 3 }}
+              innerIconStyle={{ borderWidth: 2, borderRadius: 3 }}
+              textStyle={{ fontFamily: "JosefinSans-Regular" }}
+              disableText={true}
+              onPress={() => completeTask(id)}
+              isChecked={complete === 1}
+            />
+            <ThemedText type="defaultSemiBold" numberOfLines={1} ellipsizeMode='tail' style={styles.taskTitle}>{title}</ThemedText>
+            <ThemedText type="link">{date}</ThemedText>
+          </ThemedView>
+      </View>
+
+
+    </Pressable>
+
+    
   );
 };
 

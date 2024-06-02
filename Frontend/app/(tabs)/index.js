@@ -9,7 +9,6 @@ import {
   Text, 
   TextInput, 
   Platform, 
-  Button, 
   TouchableWithoutFeedback, 
   Keyboard,
   KeyboardAvoidingView, 
@@ -26,15 +25,14 @@ import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import Task from '@/components/Task';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
+import { HelloWave } from '@/components/HelloWave';
 
 // Hook imports
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCaretUp,faSquareCheck } from '@fortawesome/free-solid-svg-icons';
+import { faCaretUp, faSquareCheck } from '@fortawesome/free-solid-svg-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { HelloWave } from '@/components/HelloWave';
-
 
 // Extract date comparison functions
 const isToday = (date) => new Date(date).setHours(0,0,0,0) === new Date().setHours(0,0,0,0);
@@ -43,67 +41,46 @@ const isTomorrow = (date) => {
   tomorrow.setDate(tomorrow.getDate() + 1);
   return new Date(date).setHours(0,0,0,0) === tomorrow.setHours(0,0,0,0);
 };
-const isFuture = (date) => {
-  const dayAfterTomorrow = new Date();
-  dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
-  return new Date(date).setHours(0,0,0,0) >= dayAfterTomorrow.setHours(0,0,0,0);
-};
 const isOverdue = (date) => new Date(date).setHours(0,0,0,0) < new Date().setHours(0,0,0,0);
 
+// Active user ID
 const userId = 1;
-
-
 
 export default function TaskPage() {
 
-  useEffect(() => {
-  fetch('http://localhost:8080/tasks/1')
-    .then(res => res.json())
-    .then(data => {
-      const tasksWithDateObjects = data.map(task => ({
-        ...task,
-        date: new Date(task.date)
-      }));
-      setTasks(tasksWithDateObjects);
-    })
-    .catch(err => console.log('Error:', err))
-  }, [])
-
-
-
+  // Task state variables
   const [tasks, setTasks] = useState([]);
-  const [task, setTask] = useState();
+  const [task, setTask] = useState('');
   const [date, setDate] = useState(new Date());
-  const [mode, setMode] = useState('date');
+  const [selectedFilter, setSelectedFilter] = useState('All');
+  
+  // Vriables used for the bottomsheet 
+  const colorScheme = useColorScheme();
+  const snapPoints = useMemo(() => ["50%"], []);
+  const bottomSheetRef = useRef(null);
+  const inputRef = useRef(null);
 
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setDate(currentDate);
-  };
+  // Fetches the tasks from the backend  and stores them in the state variable above
+  useEffect(() => {
+    fetch('http://localhost:8080/tasks/1')
+      .then(res => res.json())
+      .then(data => {
+        const tasksWithDateObjects = data.map(task => ({
+          ...task,
+          date: new Date(task.date)
+        }));
+        setTasks(tasksWithDateObjects);
+      })
+      .catch(err => console.log('Error:', err))
+  }, []);
 
-  const addTask = (title, date) => {
-    setTasks(prevtasks => [...prevtasks, { title, date }]);
-  };
-
+  // Controls the bottom sheet which is where a user can add a new task
   const handleOpenBottom = () => {
     bottomSheetRef.current?.expand();
     inputRef.current.focus();
   };
 
-  const handleAddTask = () => {
-    bottomSheetRef.current?.close();
-    console.log(task);
-    console.log(date);
-    setTasks(prevtasks => [...prevtasks, { title: task, date: date }]);
-    setTask(null);
-  }
-  
-  const colorScheme = useColorScheme();
-
-  const snapPoints = useMemo(() => ["50%"], []);
-  const bottomSheetRef = useRef(null);
-  const inputRef = useRef(null);
-
+  // Casts a backdrop when the bottom sheet is active
   const renderBackdrop = useCallback(
     (props) => (
       <BottomSheetBackdrop
@@ -111,61 +88,56 @@ export default function TaskPage() {
         disappearsOnIndex={-1}
         appearsOnIndex={0}
       />
-    ),
-    []
+    ), []
   );
 
-const updateTaskInState = (updatedTask) => {
-  console.log('Updating task in state', updatedTask);
+  // Handles the date selector input located within the bottom sheet
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setDate(currentDate);
+  };
 
-  console.log('Tasks before update:', tasks);
+  // Handles the add task function located in the bottom sheet
+  const handleAddTask = () => {
+    bottomSheetRef.current?.close();
+    setTasks(prevTasks => [...prevTasks, { title: task, date }]);
+    setTask('');
+  };
 
-  console.log('Complete value in updatedTask:', updatedTask.complete);
+  // Handles the task update in the task state variable when a task is set to complete or uncomplete
+  const updateTaskInState = (updatedTask) => {
+    setTasks(prevTasks => 
+      prevTasks.map(task => 
+        task.task_id === updatedTask.id 
+          ? { ...task, complete: updatedTask.complete } 
+          : task
+      )
+    );
+  };
 
-  setTasks(tasks.map(task => 
-    task.task_id === updatedTask.id 
-      ? { ...task, complete: updatedTask.complete } 
-      : task
-  ));
-};
-
-
+  // Filter options for the tasks
   const filterOptions = ['All', 'Today', 'Tomorrow', 'Overdue', 'Completed'];
+  
+  // Logic for the filtered views
+  const filterFunctions = {
+    'All': task => task.complete !== 1,
+    'Today': task => isToday(task.date) && task.complete !== 1,
+    'Tomorrow': task => isTomorrow(task.date) && task.complete !== 1,
+    'Overdue': task => isOverdue(task.date) && task.complete !== 1,
+    'Completed': task => task.complete === 1
+  };
 
-  const [selectedFilter, setSelectedFilter] = useState('All');
-
-  const filteredTasks = tasks.filter(task => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const taskDate = new Date(task.date);
-    taskDate.setHours(0, 0, 0, 0);
-
-    switch (selectedFilter) {
-      case 'Today':
-        return taskDate.getTime() === today.getTime() && task.complete !== 1;
-      case 'Tomorrow':
-        return taskDate.getTime() === tomorrow.getTime() && task.complete !== 1;
-      case 'Overdue':
-        return taskDate.getTime() < today.getTime() && task.complete !== 1;
-      case 'Completed':
-        return task.complete === 1;
-      default:
-        // if 'All' or any other value is selected, return all tasks
-        return task.complete !== 1;
-    }
-  });
+  const filteredTasks = tasks.filter(filterFunctions[selectedFilter] || filterFunctions['All']);
 
   return (   
+
+    // Main container, view is contained within safe area and will be themed automatically to user devices theme
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={[styles.container, {backgroundColor: colorScheme === 'dark' ? '#000' : '#fff'}]}>
-        <View style={styles.headerContainer}>
+        <View>
           <View style={styles.welcomeContainer}>
             <ThemedText type='title'>Hello, Valen</ThemedText>
-            <HelloWave/>
+            <HelloWave />
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterContainer}>
@@ -174,7 +146,7 @@ const updateTaskInState = (updatedTask) => {
                 key={option} 
                 style={[
                   styles.filterOption, 
-                  selectedFilter === option ? styles.selectedFilter : null
+                  selectedFilter === option && styles.selectedFilter
                 ]}
                 onPress={() => setSelectedFilter(option)}
               >
@@ -184,59 +156,54 @@ const updateTaskInState = (updatedTask) => {
           </ScrollView>
         </View>
 
-
         <View style={styles.taskContainer}>
-          <ScrollView>
+          <ScrollView style={{flex: 1}}>
             {filteredTasks.length > 0 ? (
               filteredTasks.map(task => (
-                <Task key={task.task_id} id={task.task_id} title={task.title} date={task.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} complete={task.complete} updateTaskInState={updateTaskInState}/>
+                <Task key={task.task_id} id={task.task_id} title={task.title} date={task.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} complete={task.complete} updateTaskInState={updateTaskInState} />
               ))
             ) : (
-              <ThemedView style={styles.noTask}>
-                <FontAwesomeIcon icon={faSquareCheck} color="#0a7ea4" size='50' />
-                <ThemedText type='subtitle'>All tasks complete!</ThemedText>
-              </ThemedView>
-
+              selectedFilter !== 'Completed' && (
+                <ThemedView style={styles.noTask}>
+                  <FontAwesomeIcon icon={faSquareCheck} color="#0a7ea4" size='50' />
+                  <ThemedText type='subtitle'>All tasks complete!</ThemedText>
+                </ThemedView>
+              )
             )}
           </ScrollView>
         </View>
 
-        
         <ThemedView style={styles.absoluteContainer}>
           <TouchableOpacity onPress={handleOpenBottom} style={styles.addTaskWrapper}>
-            <ThemedText type='title' style={{color: '#fff'}}>+</ThemedText>
+            <ThemedText type='title' style={styles.addTaskText}>+</ThemedText>
           </TouchableOpacity>
         </ThemedView>
-      
+
         <BottomSheet
           ref={bottomSheetRef}
           snapPoints={snapPoints}
-          initialSnapIndex={-1} // This makes the sheet hidden at first
+          initialSnapIndex={-1}
           backdropComponent={renderBackdrop}
           styles={styles.bottomContainer}
           backgroundStyle={{backgroundColor: colorScheme === 'dark' ? '#1f1f1f' : '#fff'}}
           handleIndicatorStyle={{ display: "none" }}
         >
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          >
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
             <View style={styles.writeTaskWrapper}>
               <TextInput 
-                style={styles.input} 
+                style={[styles.input, {color: colorScheme === 'dark' ? '#fff' : '#000'}]} 
                 placeholder={'What do you need to do?'}
                 placeholderTextColor={'#787878'}
-                color={colorScheme === 'dark' ? '#fff' : '#000'}
-                onChangeText={text => setTask(text)}
+                onChangeText={setTask}
                 value={task}
                 ref={inputRef}
               />
-
-              <TouchableOpacity onPress={() => handleAddTask()}>
+              <TouchableOpacity onPress={handleAddTask}>
                 <ThemedView style={styles.submitTask}>
                   <FontAwesomeIcon icon={faCaretUp} color="#fff" />
                 </ThemedView>
               </TouchableOpacity>
             </View>
-
             <View style={styles.dateSelector}>
               <DateTimePicker
                 value={date}
@@ -246,34 +213,23 @@ const updateTaskInState = (updatedTask) => {
                 onChange={onChange}
               />
             </View>
-              
           </KeyboardAvoidingView>
         </BottomSheet>
-
       </SafeAreaView>
-
     </TouchableWithoutFeedback> 
   );
 }
 
-
-
-
 // Styles
 const styles = StyleSheet.create({
-  container: {
+  container: { 
     flex: 1,
-  },
-  headerContainer: {
-    flexDirection: 'column',
-    padding: 14,
   },
   welcomeContainer: {
     flexDirection: 'row',
+    paddingTop: 14,
+    marginLeft: 14,
     marginBottom: 16,
-  },
-  filterContainer: {
-    flexDirection: 'row',
     gap: 16,
   },
   filterOption: {
@@ -281,27 +237,21 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 25,
-    marginRight: 8,
+    marginLeft: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
   selectedFilter: {
-    backgroundColor: '#0a7ea4', // change this to the color you want
+    backgroundColor: '#0a7ea4',
   },
   filterTitle: {
     color: 'white'
   },
   taskContainer: {
     flex: 1,
-    flexDirection: 'column',
     padding: 14,
-    height: '100%',
-  },
-  task: {
-    marginBottom: 8,
   },
   noTask: {
-    display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: '60%',
@@ -330,7 +280,6 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   submitTask: {
-    color: 'white',
     backgroundColor: '#0a7ea4',
     justifyContent: 'center',
     width: 28,
@@ -340,14 +289,14 @@ const styles = StyleSheet.create({
   },
   absoluteContainer: {
     position: 'absolute',
-    bottom: 10, // Adjust these values as needed
-    right: 10, // Adjust these values as needed
-    width: 70, // Adjust these values as needed
+    bottom: 10,
+    right: 10,
+    width: 70,
     height: 70,
     justifyContent: 'flex-end',
     alignItems: 'flex-end',
     padding: 30,
-    backgroundColor: 'transparent', // Adjust this value as needed for your layout
+    backgroundColor: 'transparent',
   },
   addTaskWrapper: {
     width: 70,
@@ -356,6 +305,9 @@ const styles = StyleSheet.create({
     borderRadius: 60,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  addTaskText: {
+    color: '#fff',
   },
   sheetContainer: {
     flex: 1,
