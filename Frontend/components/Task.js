@@ -58,6 +58,10 @@ const Task = ({ id, title, date, complete, updateTaskInState, onPress }) => {
     taskTitle: {
       flex: 1,
     },
+    taskTitleComplete: {
+      textDecorationLine: 'line-through',
+      color: '#888',
+  },
   });
 
   return (
@@ -75,7 +79,7 @@ const Task = ({ id, title, date, complete, updateTaskInState, onPress }) => {
             onPress={completeTask}
             isChecked={complete === 1}
           />
-          <ThemedText type="defaultSemiBold" numberOfLines={1} ellipsizeMode='tail' style={styles.taskTitle}>{title}</ThemedText>
+          <ThemedText type="defaultSemiBold" numberOfLines={1} ellipsizeMode='tail' style={[styles.taskTitle, complete && styles.taskTitleComplete]}>{title}</ThemedText>
           <ThemedText type="link">{date}</ThemedText>
         </ThemedView>
       </View>

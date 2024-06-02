@@ -1,10 +1,12 @@
-import React, { useContext, useState } from 'react';
-import { View, StyleSheet, FlatList, Keyboard, TouchableWithoutFeedback, SafeAreaView } from 'react-native';
+import React, { useContext, useState, useRef } from 'react';
+import { View, StyleSheet, FlatList, Keyboard, TouchableWithoutFeedback, SafeAreaView, TouchableOpacity } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { TasksContext } from '@/contexts/TasksContext';
+import TaskBottomSheet from '@/components/TaskBottomSheet';
+import Task from '@/components/Task';
 
 // Configure the calendar locale (optional)
 LocaleConfig.locales['en'] = {
@@ -16,17 +18,55 @@ LocaleConfig.locales['en'] = {
 LocaleConfig.defaultLocale = 'en';
 
 const CalendarPage = () => {
-  const { tasks } = useContext(TasksContext);
+  const { tasks, setTasks } = useContext(TasksContext);
   const [selectedDate, setSelectedDate] = useState('');
+  const [task, setTask] = useState('');
+  const [date, setDate] = useState(new Date());
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentTaskId, setCurrentTaskId] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const bottomSheetRef = useRef(null);
   const colorScheme = useColorScheme();
 
   const filteredTasks = tasks.filter(task => task.date.toISOString().split('T')[0] === selectedDate);
 
+  const resetForm = () => {
+    setTask('');
+    setDate(new Date());
+    setIsEditing(false);
+    setCurrentTaskId(null);
+    setIsOpen(false);
+    bottomSheetRef.current?.close();
+  };
+
+  const updateTaskInState = (updatedTask) => {
+    setTasks(prevTasks => 
+      prevTasks.map(task => 
+        task.task_id === updatedTask.id 
+          ? { ...task, complete: updatedTask.complete } 
+          : task
+      )
+    );
+  };
+
   const renderItem = ({ item }) => (
-    <ThemedView style={styles.taskItem}>
-      <ThemedText type='body' style={styles.taskTitle}>{item.title}</ThemedText>
-      <ThemedText type='body' style={styles.taskDate}>{item.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</ThemedText>
-    </ThemedView>
+    <Task 
+      key={item.task_id} 
+      id={item.task_id} 
+      title={item.title} 
+      complete={item.complete} 
+      updateTaskInState={updateTaskInState}
+      onPress={() => {
+        setTask(item.title);
+        setDate(item.date);
+        setCurrentTaskId(item.task_id);
+        setIsEditing(true);
+        setIsOpen(true);
+        bottomSheetRef.current?.expand();
+      }}
+      showDate={false} // Hide the date in the Task component for the CalendarPage
+    />
   );
 
   return (
@@ -65,6 +105,32 @@ const CalendarPage = () => {
           keyExtractor={item => item.task_id.toString()}
           ListEmptyComponent={<ThemedText type='subtitle' style={styles.noTasks}>No tasks for this date</ThemedText>}
         />
+
+        <ThemedView style={styles.absoluteContainer}>
+          <TouchableOpacity onPress={() => {
+            setIsEditing(false);
+            setTask('');
+            setDate(new Date());
+            setIsOpen(true);
+            bottomSheetRef.current?.expand();
+          }} style={styles.addTaskWrapper}>
+            <ThemedText type='title' style={styles.addTaskText}>+</ThemedText>
+          </TouchableOpacity>
+        </ThemedView>
+
+        <TaskBottomSheet
+          bottomSheetRef={bottomSheetRef}
+          task={task}
+          setTask={setTask}
+          date={date}
+          setDate={setDate}
+          isEditing={isEditing}
+          currentTaskId={currentTaskId}
+          setTasks={setTasks}
+          resetForm={resetForm}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+        />
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );
@@ -102,6 +168,28 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 16,
     color: '#888',
+  },
+  absoluteContainer: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    width: 70,
+    height: 70,
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    padding: 30,
+    backgroundColor: 'transparent',
+  },
+  addTaskWrapper: {
+    width: 70,
+    height: 70,
+    backgroundColor: '#0a7ea4',
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addTaskText: {
+    color: '#fff',
   },
 });
 
