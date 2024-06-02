@@ -1,23 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { createStackNavigator } from '@react-navigation/stack';
 import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import LoginScreen from './LoginScreen';
-import SignupScreen from './SignupScreen';
+import { AuthProvider, useAuth } from '../AuthContext';
+import LoginScreen from './login';
+import SignupScreen from './signup';
 import TabLayout from './(tabs)/_layout'; // Adjust this path as needed
 
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+const Stack = createStackNavigator();
+
+function RootLayoutInner() {
   const colorScheme = useColorScheme();
+  const { isAuthenticated } = useAuth();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
-
-  // Authentication state
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     if (loaded) {
@@ -31,16 +32,24 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!isAuthenticated ? (
           <>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Signup" component={SignupScreen} />
+            <Stack.Screen name="login" component={LoginScreen} />
+            <Stack.Screen name="signup" component={SignupScreen} />
           </>
         ) : (
-          <Stack.Screen name="Main" component={TabLayout} />
+          <Stack.Screen name="(tabs)" component={TabLayout} />
         )}
-      </Stack>
+      </Stack.Navigator>
     </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <RootLayoutInner />
+    </AuthProvider>
   );
 }
