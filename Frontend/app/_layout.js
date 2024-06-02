@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { AuthProvider, useAuth } from '../AuthContext';
+import { TasksProvider } from '@/contexts/TasksContext';
 import LoginScreen from './login';
 import SignupScreen from './signup';
 import TabLayout from './(tabs)/_layout'; // Adjust this path as needed
@@ -49,7 +50,9 @@ function RootLayoutInner() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootLayoutInner />
+      <TasksProvider>
+        <RootLayoutInner />
+      </TasksProvider>
     </AuthProvider>
   );
 }

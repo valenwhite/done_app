@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import { View, StyleSheet, FlatList, Keyboard, TouchableWithoutFeedback, SafeAreaView } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { TasksContext } from '@/contexts/TasksContext';
 
 // Configure the calendar locale (optional)
 LocaleConfig.locales['en'] = {
@@ -15,30 +16,16 @@ LocaleConfig.locales['en'] = {
 LocaleConfig.defaultLocale = 'en';
 
 const CalendarPage = () => {
+  const { tasks } = useContext(TasksContext);
   const [selectedDate, setSelectedDate] = useState('');
-  const [tasks, setTasks] = useState([]);
   const colorScheme = useColorScheme();
 
-  useEffect(() => {
-    if (selectedDate) {
-      fetchTasksForDate(selectedDate);
-    }
-  }, [selectedDate]);
-
-  const fetchTasksForDate = async (date) => {
-    try {
-      const response = await fetch(`http://localhost:8080/tasks?date=${date}`);
-      const data = await response.json();
-      setTasks(data);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-    }
-  };
+  const filteredTasks = tasks.filter(task => task.date.toISOString().split('T')[0] === selectedDate);
 
   const renderItem = ({ item }) => (
     <ThemedView style={styles.taskItem}>
       <ThemedText type='body' style={styles.taskTitle}>{item.title}</ThemedText>
-      <ThemedText type='body' style={styles.taskDate}>{item.date}</ThemedText>
+      <ThemedText type='body' style={styles.taskDate}>{item.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</ThemedText>
     </ThemedView>
   );
 
@@ -73,7 +60,7 @@ const CalendarPage = () => {
           }}
         />
         <FlatList
-          data={tasks}
+          data={filteredTasks}
           renderItem={renderItem}
           keyExtractor={item => item.task_id.toString()}
           ListEmptyComponent={<ThemedText type='subtitle' style={styles.noTasks}>No tasks for this date</ThemedText>}
