@@ -21,7 +21,7 @@ export default function TabLayout() {
       }}
     >
       <Tab.Screen
-        name="index"
+        name="home"
         component={IndexScreen}
         options={{
           title: 'Home',

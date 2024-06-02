@@ -16,7 +16,9 @@ const TaskBottomSheet = ({
   isEditing, 
   currentTaskId, 
   setTasks, 
-  resetForm 
+  resetForm,
+  isOpen,
+  setIsOpen
 }) => {
   const colorScheme = useColorScheme();
   const inputRef = useRef(null);
@@ -25,11 +27,11 @@ const TaskBottomSheet = ({
   const snapPoints = useMemo(() => (isEditing ? ["55%"] : ["50%"]), [isEditing]);
 
   useEffect(() => {
-    if (!isEditing && bottomSheetRef.current) {
+    if (isOpen && !isEditing) {
       const timeout = setTimeout(() => inputRef.current?.focus(), 100);
       return () => clearTimeout(timeout);
     }
-  }, [isEditing, bottomSheetRef]);
+  }, [isEditing, isOpen]);
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -75,6 +77,7 @@ const TaskBottomSheet = ({
         setTasks(prevTasks => [...prevTasks, { ...data, date: new Date(data.date) }]);
       }
       resetForm();
+      setIsOpen(false);
       bottomSheetRef.current?.close();
     } catch (err) {
       console.log('Error:', err.message);
@@ -93,6 +96,7 @@ const TaskBottomSheet = ({
       await res.json();
       setTasks(prevTasks => prevTasks.filter(t => t.task_id !== currentTaskId));
       resetForm();
+      setIsOpen(false);
       bottomSheetRef.current?.close();
     } catch (err) {
       console.log('Error:', err.message);
@@ -107,10 +111,11 @@ const TaskBottomSheet = ({
     <BottomSheet
       ref={bottomSheetRef}
       snapPoints={snapPoints}
-      initialSnapIndex={-1} // Keeps the bottom sheet closed initially
+      initialSnapIndex={0} // Keeps the bottom sheet closed initially
       backdropComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: colorScheme === 'dark' ? '#1f1f1f' : '#fff' }}
       handleIndicatorStyle={{ display: "none" }}
+      onChange={(index) => setIsOpen(index !== -1)}
     >
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 

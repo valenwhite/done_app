@@ -24,6 +24,7 @@ const TaskPage = () => {
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [isEditing, setIsEditing] = useState(false);
   const [currentTaskId, setCurrentTaskId] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   const bottomSheetRef = useRef(null);
 
@@ -50,6 +51,7 @@ const TaskPage = () => {
     setDate(new Date());
     setIsEditing(false);
     setCurrentTaskId(null);
+    setIsOpen(false);
     bottomSheetRef.current?.close(); // Ensure this is called here
   };
 
@@ -115,6 +117,7 @@ const TaskPage = () => {
                     setDate(task.date);
                     setCurrentTaskId(task.task_id);
                     setIsEditing(true);
+                    setIsOpen(true);
                     bottomSheetRef.current?.expand();
                   }}
                 />
@@ -135,6 +138,7 @@ const TaskPage = () => {
             setIsEditing(false);
             setTask('');
             setDate(new Date());
+            setIsOpen(true);
             bottomSheetRef.current?.expand();
           }} style={styles.addTaskWrapper}>
             <ThemedText type='title' style={styles.addTaskText}>+</ThemedText>
@@ -151,6 +155,8 @@ const TaskPage = () => {
           currentTaskId={currentTaskId}
           setTasks={setTasks}
           resetForm={resetForm}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
         />
       </SafeAreaView>
     </TouchableWithoutFeedback>
