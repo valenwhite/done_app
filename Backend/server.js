@@ -9,7 +9,6 @@ const pool = mysql.createPool({
     database: process.env.MYSQL_DATABASE
 }).promise();
 
-
 // User Functions
 
 export async function getUser(id) {
@@ -26,20 +25,11 @@ export async function createUser(name, email, password) {
         INSERT INTO users (name, email, pasword) 
         VALUES (?, ?, ?)
         `, [name, email, password]);
-        const id =result.insertId;
+    const id = result.insertId;
     return getUser(id);
 };
 
-
-// Task Related Fucntions
-
-export async function getAllTasks() {
-    const [rows] = await pool.query(`
-        SELECT * 
-        FROM tasks 
-        `);
-    return rows;
-};
+// Task Related Functions
 
 export async function getTasks(id) {
     const [rows] = await pool.query(`
@@ -64,17 +54,26 @@ export async function createTask(userId, title, date) {
         INSERT INTO tasks (user_id, title, date) 
         VALUES (?, ?, ?)
         `, [userId, title, date]);
-        const id =result.insertId;
-    return getNote(id);
+    const id = result[0].insertId;
+    return getTask(id);
+};
+
+export async function updateTaskDetails(id, title, date) {
+    await pool.query(`
+        UPDATE tasks 
+        SET title = ?, date = ?
+        WHERE task_id = ?
+        `, [title, date, id]);
+    return getTask(id);
 };
 
 export async function toggleTaskCompletion(id, complete) {
-    const result = await pool.query(`
+    await pool.query(`
         UPDATE tasks 
         SET complete = ?
         WHERE task_id = ?
         `, [complete, id]);
-    return result.complete;
+    return getTask(id);
 };
 
 export async function deleteTask(id) {
@@ -84,4 +83,3 @@ export async function deleteTask(id) {
         `, [id]);
     return result.affectedRows;
 };
-

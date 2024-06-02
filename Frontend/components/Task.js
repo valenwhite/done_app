@@ -1,16 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { StyleSheet, View, TouchableOpacity, Pressable } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { StyleSheet, View, TouchableOpacity, Pressable } from 'react-native';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
-import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
-import CustomBottomSheet from '@/components/CustomBottomSheet';
 
-const Task = ({  id, title, date, complete, updateTaskInState }) => {
+const Task = ({ id, title, date, complete, updateTaskInState, onPress }) => {
+  const tintBackground = useThemeColor({}, 'tintBackground');
 
-  const tintBackground= useThemeColor({}, 'tintBackground');
-  
   const completeTask = async () => {
     try {
       const response = await fetch(`http://localhost:8080/tasks/${id}`, {
@@ -64,28 +61,25 @@ const Task = ({  id, title, date, complete, updateTaskInState }) => {
   });
 
   return (
-    <Pressable>
+    <Pressable onPress={onPress}>
       <View style={styles.tasksContainer}>
-          <ThemedView style={styles.taskDetails}>
-            <BouncyCheckbox
-              size={25}
-              fillColor='#0a7ea4'
-              unFillColor="#FFFFFF"
-              iconStyle={{ borderColor: '#0a7ea4', borderRadius: 3 }}
-              innerIconStyle={{ borderWidth: 2, borderRadius: 3 }}
-              textStyle={{ fontFamily: "JosefinSans-Regular" }}
-              disableText={true}
-              onPress={() => completeTask(id)}
-              isChecked={complete === 1}
-            />
-            <ThemedText type="defaultSemiBold" numberOfLines={1} ellipsizeMode='tail' style={styles.taskTitle}>{title}</ThemedText>
-            <ThemedText type="link">{date}</ThemedText>
-          </ThemedView>
-          
+        <ThemedView style={styles.taskDetails}>
+          <BouncyCheckbox
+            size={25}
+            fillColor='#0a7ea4'
+            unFillColor="#FFFFFF"
+            iconStyle={{ borderColor: '#0a7ea4', borderRadius: 3 }}
+            innerIconStyle={{ borderWidth: 2, borderRadius: 3 }}
+            textStyle={{ fontFamily: "JosefinSans-Regular" }}
+            disableText={true}
+            onPress={completeTask}
+            isChecked={complete === 1}
+          />
+          <ThemedText type="defaultSemiBold" numberOfLines={1} ellipsizeMode='tail' style={styles.taskTitle}>{title}</ThemedText>
+          <ThemedText type="link">{date}</ThemedText>
+        </ThemedView>
       </View>
     </Pressable>
-
-    
   );
 };
 

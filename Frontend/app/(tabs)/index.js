@@ -1,36 +1,14 @@
-// React imports
-import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
-
-// React Native imports
-import { 
-  StyleSheet, 
-  SafeAreaView, 
-  View, 
-  Text, 
-  Platform, 
-  TouchableWithoutFeedback, 
-  Keyboard,
-  ScrollView, 
-  Pressable
-} from 'react-native';
-
-// Gesture handler imports
-import { TouchableOpacity } from 'react-native-gesture-handler';
-
-// Local component imports
-import Task from '@/components/Task';
-import { ThemedView } from '@/components/ThemedView';
+import React, { useState, useRef, useEffect } from 'react';
 import { ThemedText } from '@/components/ThemedText';
-import { HelloWave } from '@/components/HelloWave';
-import AddTaskBottomSheet from '@/components/AddTaskBottomSheet';
-
-// Hook imports
-import { useColorScheme } from '@/hooks/useColorScheme';
-
+import { ThemedView } from '@/components/ThemedView';
+import { useThemeColor } from '@/hooks/useThemeColor';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Pressable, SafeAreaView, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import Task from '@/components/Task';
+import TaskBottomSheet from '@/components/TaskBottomSheet';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faSquareCheck } from '@fortawesome/free-solid-svg-icons';
 
-// Extract date comparison functions
+// Date comparison functions
 const isToday = (date) => new Date(date).setHours(0,0,0,0) === new Date().setHours(0,0,0,0);
 const isTomorrow = (date) => {
   const tomorrow = new Date();
@@ -39,43 +17,42 @@ const isTomorrow = (date) => {
 };
 const isOverdue = (date) => new Date(date).setHours(0,0,0,0) < new Date().setHours(0,0,0,0);
 
-// Active user ID
-const userId = 1;
-
-export default function TaskPage() {
-
-  // Task state variables
+const TaskPage = () => {
   const [tasks, setTasks] = useState([]);
   const [task, setTask] = useState('');
   const [date, setDate] = useState(new Date());
   const [selectedFilter, setSelectedFilter] = useState('All');
-  
-  // Variables used for the bottomsheet 
-  const colorScheme = useColorScheme();
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentTaskId, setCurrentTaskId] = useState(null);
+
   const bottomSheetRef = useRef(null);
 
-  // Fetches the tasks from the backend and stores them in the state variable above
   useEffect(() => {
-    fetch('http://localhost:8080/tasks/1')
-      .then(res => res.json())
-      .then(data => {
+    const fetchTasks = async () => {
+      try {
+        const res = await fetch('http://localhost:8080/tasks/1');
+        const data = await res.json();
         const tasksWithDateObjects = data.map(task => ({
           ...task,
           date: new Date(task.date)
         }));
         setTasks(tasksWithDateObjects);
-      })
-      .catch(err => console.log('Error:', err))
+      } catch (err) {
+        console.log('Error:', err);
+      }
+    };
+
+    fetchTasks();
   }, []);
 
-  // Handles the add task function
-  const handleAddTask = () => {
-    bottomSheetRef.current?.close();
-    setTasks(prevTasks => [...prevTasks, { title: task, date }]);
+  const resetForm = () => {
     setTask('');
+    setDate(new Date());
+    setIsEditing(false);
+    setCurrentTaskId(null);
+    bottomSheetRef.current?.close(); // Ensure this is called here
   };
 
-  // Handles the task update in the task state variable when a task is set to complete or uncomplete
   const updateTaskInState = (updatedTask) => {
     setTasks(prevTasks => 
       prevTasks.map(task => 
@@ -86,10 +63,8 @@ export default function TaskPage() {
     );
   };
 
-  // Filter options for the tasks
   const filterOptions = ['All', 'Today', 'Tomorrow', 'Overdue', 'Completed'];
   
-  // Logic for the filtered views
   const filterFunctions = {
     'All': task => task.complete !== 1,
     'Today': task => isToday(task.date) && task.complete !== 1,
@@ -100,14 +75,12 @@ export default function TaskPage() {
 
   const filteredTasks = tasks.filter(filterFunctions[selectedFilter] || filterFunctions['All']);
 
-  return (   
-    // Main container, view is contained within safe area and will be themed automatically to user devices theme
+  return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={[styles.container, {backgroundColor: colorScheme === 'dark' ? '#000' : '#fff'}]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: useThemeColor({}, 'background') }]}>
         <View>
           <View style={styles.welcomeContainer}>
             <ThemedText type='title'>Hello, Valen</ThemedText>
-            <HelloWave />
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterContainer}>
@@ -127,15 +100,29 @@ export default function TaskPage() {
         </View>
 
         <View style={styles.taskContainer}>
-          <ScrollView style={{flex: 1}}>
+          <ScrollView style={{ flex: 1 }}>
             {filteredTasks.length > 0 ? (
               filteredTasks.map(task => (
-                <Task key={task.task_id} id={task.task_id} title={task.title} date={task.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} complete={task.complete} updateTaskInState={updateTaskInState} />
+                <Task 
+                  key={task.task_id} 
+                  id={task.task_id} 
+                  title={task.title} 
+                  date={task.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} 
+                  complete={task.complete} 
+                  updateTaskInState={updateTaskInState}
+                  onPress={() => {
+                    setTask(task.title);
+                    setDate(task.date);
+                    setCurrentTaskId(task.task_id);
+                    setIsEditing(true);
+                    bottomSheetRef.current?.expand();
+                  }}
+                />
               ))
             ) : (
               selectedFilter !== 'Completed' && (
                 <ThemedView style={styles.noTask}>
-                  <FontAwesomeIcon icon={faSquareCheck} color="#0a7ea4" size='50' />
+                  <FontAwesomeIcon icon={faSquareCheck} color="#0a7ea4" size={50} />
                   <ThemedText type='subtitle'>All tasks complete!</ThemedText>
                 </ThemedView>
               )
@@ -144,25 +131,32 @@ export default function TaskPage() {
         </View>
 
         <ThemedView style={styles.absoluteContainer}>
-          <TouchableOpacity onPress={() => bottomSheetRef.current?.expand()} style={styles.addTaskWrapper}>
+          <TouchableOpacity onPress={() => {
+            setIsEditing(false);
+            setTask('');
+            setDate(new Date());
+            bottomSheetRef.current?.expand();
+          }} style={styles.addTaskWrapper}>
             <ThemedText type='title' style={styles.addTaskText}>+</ThemedText>
           </TouchableOpacity>
         </ThemedView>
 
-        <AddTaskBottomSheet
+        <TaskBottomSheet
           bottomSheetRef={bottomSheetRef}
-          handleAddTask={handleAddTask}
           task={task}
           setTask={setTask}
           date={date}
           setDate={setDate}
+          isEditing={isEditing}
+          currentTaskId={currentTaskId}
+          setTasks={setTasks}
+          resetForm={resetForm}
         />
       </SafeAreaView>
-    </TouchableWithoutFeedback> 
+    </TouchableWithoutFeedback>
   );
-}
+};
 
-// Styles
 const styles = StyleSheet.create({
   container: { 
     flex: 1,
@@ -173,6 +167,9 @@ const styles = StyleSheet.create({
     marginLeft: 14,
     marginBottom: 16,
     gap: 16,
+  },
+  filterContainer: {
+    marginBottom: 20,
   },
   filterOption: {
     backgroundColor: '#58a9c4',
@@ -222,3 +219,5 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
 });
+
+export default TaskPage;
