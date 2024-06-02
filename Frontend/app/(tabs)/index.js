@@ -7,32 +7,28 @@ import {
   SafeAreaView, 
   View, 
   Text, 
-  TextInput, 
   Platform, 
   TouchableWithoutFeedback, 
   Keyboard,
-  KeyboardAvoidingView, 
+  ScrollView, 
   Pressable
 } from 'react-native';
 
 // Gesture handler imports
-import { TouchableOpacity, ScrollView } from 'react-native-gesture-handler';
-
-// Gorhom BottomSheet imports
-import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 // Local component imports
 import Task from '@/components/Task';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { HelloWave } from '@/components/HelloWave';
+import AddTaskBottomSheet from '@/components/AddTaskBottomSheet';
 
 // Hook imports
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCaretUp, faSquareCheck } from '@fortawesome/free-solid-svg-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { faSquareCheck } from '@fortawesome/free-solid-svg-icons';
 
 // Extract date comparison functions
 const isToday = (date) => new Date(date).setHours(0,0,0,0) === new Date().setHours(0,0,0,0);
@@ -54,13 +50,11 @@ export default function TaskPage() {
   const [date, setDate] = useState(new Date());
   const [selectedFilter, setSelectedFilter] = useState('All');
   
-  // Vriables used for the bottomsheet 
+  // Variables used for the bottomsheet 
   const colorScheme = useColorScheme();
-  const snapPoints = useMemo(() => ["50%"], []);
   const bottomSheetRef = useRef(null);
-  const inputRef = useRef(null);
 
-  // Fetches the tasks from the backend  and stores them in the state variable above
+  // Fetches the tasks from the backend and stores them in the state variable above
   useEffect(() => {
     fetch('http://localhost:8080/tasks/1')
       .then(res => res.json())
@@ -74,30 +68,7 @@ export default function TaskPage() {
       .catch(err => console.log('Error:', err))
   }, []);
 
-  // Controls the bottom sheet which is where a user can add a new task
-  const handleOpenBottom = () => {
-    bottomSheetRef.current?.expand();
-    inputRef.current.focus();
-  };
-
-  // Casts a backdrop when the bottom sheet is active
-  const renderBackdrop = useCallback(
-    (props) => (
-      <BottomSheetBackdrop
-        {...props}
-        disappearsOnIndex={-1}
-        appearsOnIndex={0}
-      />
-    ), []
-  );
-
-  // Handles the date selector input located within the bottom sheet
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setDate(currentDate);
-  };
-
-  // Handles the add task function located in the bottom sheet
+  // Handles the add task function
   const handleAddTask = () => {
     bottomSheetRef.current?.close();
     setTasks(prevTasks => [...prevTasks, { title: task, date }]);
@@ -130,7 +101,6 @@ export default function TaskPage() {
   const filteredTasks = tasks.filter(filterFunctions[selectedFilter] || filterFunctions['All']);
 
   return (   
-
     // Main container, view is contained within safe area and will be themed automatically to user devices theme
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={[styles.container, {backgroundColor: colorScheme === 'dark' ? '#000' : '#fff'}]}>
@@ -174,47 +144,19 @@ export default function TaskPage() {
         </View>
 
         <ThemedView style={styles.absoluteContainer}>
-          <TouchableOpacity onPress={handleOpenBottom} style={styles.addTaskWrapper}>
+          <TouchableOpacity onPress={() => bottomSheetRef.current?.expand()} style={styles.addTaskWrapper}>
             <ThemedText type='title' style={styles.addTaskText}>+</ThemedText>
           </TouchableOpacity>
         </ThemedView>
 
-        <BottomSheet
-          ref={bottomSheetRef}
-          snapPoints={snapPoints}
-          initialSnapIndex={-1}
-          backdropComponent={renderBackdrop}
-          styles={styles.bottomContainer}
-          backgroundStyle={{backgroundColor: colorScheme === 'dark' ? '#1f1f1f' : '#fff'}}
-          handleIndicatorStyle={{ display: "none" }}
-        >
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-            <View style={styles.writeTaskWrapper}>
-              <TextInput 
-                style={[styles.input, {color: colorScheme === 'dark' ? '#fff' : '#000'}]} 
-                placeholder={'What do you need to do?'}
-                placeholderTextColor={'#787878'}
-                onChangeText={setTask}
-                value={task}
-                ref={inputRef}
-              />
-              <TouchableOpacity onPress={handleAddTask}>
-                <ThemedView style={styles.submitTask}>
-                  <FontAwesomeIcon icon={faCaretUp} color="#fff" />
-                </ThemedView>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.dateSelector}>
-              <DateTimePicker
-                value={date}
-                mode={"date"}
-                is24Hour={true}
-                display="default"
-                onChange={onChange}
-              />
-            </View>
-          </KeyboardAvoidingView>
-        </BottomSheet>
+        <AddTaskBottomSheet
+          bottomSheetRef={bottomSheetRef}
+          handleAddTask={handleAddTask}
+          task={task}
+          setTask={setTask}
+          date={date}
+          setDate={setDate}
+        />
       </SafeAreaView>
     </TouchableWithoutFeedback> 
   );
@@ -257,36 +199,6 @@ const styles = StyleSheet.create({
     paddingTop: '60%',
     gap: 12,
   },
-  writeTaskWrapper: {
-    flexDirection: 'row',
-    paddingTop: 0,
-    paddingRight: 24,
-    paddingBottom: 0,
-    paddingLeft: 8,
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-  input: {
-    paddingVertical: 15,
-    paddingHorizontal: 15,
-    flex: 1,
-    borderRadius: 100,
-    fontSize: 18,
-    backgroundColor: 'transparent',
-  },
-  dateSelector: {
-    marginTop: 16,
-    paddingLeft: 10,
-    alignItems: 'flex-start',
-  },
-  submitTask: {
-    backgroundColor: '#0a7ea4',
-    justifyContent: 'center',
-    width: 28,
-    height: 28,
-    alignItems: 'center',
-    borderRadius: 100,
-  },
   absoluteContainer: {
     position: 'absolute',
     bottom: 10,
@@ -308,15 +220,5 @@ const styles = StyleSheet.create({
   },
   addTaskText: {
     color: '#fff',
-  },
-  sheetContainer: {
-    flex: 1,
-    padding: 24,
-    justifyContent: 'center',
-    backgroundColor: 'grey',
-  },
-  sheetContentContainer: {
-    flex: 1,
-    alignItems: 'center',
   },
 });

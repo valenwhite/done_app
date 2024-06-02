@@ -5,6 +5,7 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 import { StyleSheet, View, TouchableOpacity, Pressable } from 'react-native';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+import CustomBottomSheet from '@/components/CustomBottomSheet';
 
 const Task = ({  id, title, date, complete, updateTaskInState }) => {
 
@@ -80,9 +81,8 @@ const Task = ({  id, title, date, complete, updateTaskInState }) => {
             <ThemedText type="defaultSemiBold" numberOfLines={1} ellipsizeMode='tail' style={styles.taskTitle}>{title}</ThemedText>
             <ThemedText type="link">{date}</ThemedText>
           </ThemedView>
+          
       </View>
-
-
     </Pressable>
 
     
