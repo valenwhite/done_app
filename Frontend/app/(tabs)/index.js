@@ -7,7 +7,9 @@ import Task from '@/components/Task';
 import TaskBottomSheet from '@/components/TaskBottomSheet';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faSquareCheck } from '@fortawesome/free-solid-svg-icons';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { TasksContext } from '@/contexts/TasksContext';
+import { HelloWave } from '@/components/HelloWave';
 
 // Date comparison functions
 const isToday = (date) => new Date(date).setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0);
@@ -66,6 +68,7 @@ const TaskPage = () => {
         <View>
           <View style={styles.welcomeContainer}>
             <ThemedText type='title'>Hello, Valen</ThemedText>
+            <HelloWave></HelloWave>
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterContainer}>
@@ -124,7 +127,7 @@ const TaskPage = () => {
             setIsOpen(true);
             bottomSheetRef.current?.expand();
           }} style={styles.addTaskWrapper}>
-            <ThemedText type='title' style={styles.addTaskText}>+</ThemedText>
+            <FontAwesomeIcon icon={faPlus} size={30} color="#fff" />
           </TouchableOpacity>
         </ThemedView>
 

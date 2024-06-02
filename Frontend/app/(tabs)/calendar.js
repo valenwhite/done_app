@@ -2,12 +2,14 @@ import React, { useContext, useState, useRef } from 'react';
 import { View, StyleSheet, FlatList, Keyboard, TouchableWithoutFeedback, SafeAreaView, TouchableOpacity } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useThemeColor } from '@/hooks/useThemeColor';
 import { TasksContext } from '@/contexts/TasksContext';
 import TaskBottomSheet from '@/components/TaskBottomSheet';
 import Task from '@/components/Task';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
 // Configure the calendar locale (optional)
 LocaleConfig.locales['en'] = {
@@ -79,28 +81,30 @@ const CalendarPage = () => {
         <Calendar
           onDayPress={day => setSelectedDate(day.dateString)}
           markedDates={{
-            [selectedDate]: { selected: true, selectedColor: '#00adf5' },
+            [selectedDate]: { selected: true, selectedColor: '#0a7ea4' },
           }}
           theme={{
             backgroundColor: colorScheme === 'dark' ? '#000' : '#fff',
             calendarBackground: colorScheme === 'dark' ? '#000' : '#fff',
+            arrowColor: '#0a7ea4',
             textSectionTitleColor: colorScheme === 'dark' ? '#fff' : '#000',
-            selectedDayBackgroundColor: '#00adf5',
+            selectedDayBackgroundColor: '#0a7ea4',
             selectedDayTextColor: '#fff',
-            todayTextColor: '#00adf5',
+            todayTextColor: '#0a7ea4',
             dayTextColor: colorScheme === 'dark' ? '#fff' : '#000',
             textDisabledColor: colorScheme === 'dark' ? '#444' : '#d9e1e8',
             monthTextColor: colorScheme === 'dark' ? '#fff' : '#000',
-            indicatorColor: '#00adf5',
-            textDayFontWeight: '300',
+            indicatorColor: '#0a7ea4',
+            textDayFontWeight: '400',
             textMonthFontWeight: 'bold',
-            textDayHeaderFontWeight: '300',
+            textDayHeaderFontWeight: '400',
             textDayFontSize: 16,
             textMonthFontSize: 16,
             textDayHeaderFontSize: 16,
           }}
         />
         <FlatList
+          contentContainerStyle={styles.taskContainer}
           data={filteredTasks}
           renderItem={renderItem}
           keyExtractor={item => item.task_id.toString()}
@@ -115,7 +119,7 @@ const CalendarPage = () => {
             setIsOpen(true);
             bottomSheetRef.current?.expand();
           }} style={styles.addTaskWrapper}>
-            <ThemedText type='title' style={styles.addTaskText}>+</ThemedText>
+            <FontAwesomeIcon icon={faPlus} size={30} color="#fff" />
           </TouchableOpacity>
         </ThemedView>
 
@@ -147,6 +151,10 @@ const styles = StyleSheet.create({
     marginLeft: 14,
     marginBottom: 16,
     gap: 16,
+  },
+  taskContainer: {
+    paddingTop: 30, 
+    paddingHorizontal: 14, 
   },
   taskItem: {
     padding: 15,
