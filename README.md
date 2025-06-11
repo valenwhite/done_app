@@ -1,5 +1,5 @@
 
-# Done - A React Native Authentication App
+# Done - A React Native Task Management App
 
 ![cover](https://github.com/user-attachments/assets/0e920fd8-7055-42c2-b796-8127b35355e5)
 
