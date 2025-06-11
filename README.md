@@ -1,7 +1,7 @@
 
 # Done - A React Native Authentication App
 
-## Purpose of the Application
+![cover](https://github.com/user-attachments/assets/0e920fd8-7055-42c2-b796-8127b35355e5)
 
 **Done** is a mobile task management app built with React Native using Expo. It supports a simple authentication flow and tab-based navigation, allowing users to manage tasks and view them across different pages. The app was developed as part of unit number IFN666 at QUT (Mobile and App Development) and demonstrates the use of authentication context, custom navigation, and modular architecture.
 
