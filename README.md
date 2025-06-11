@@ -5,11 +5,9 @@
 
 **Done** is a mobile task management app built with React Native using Expo. It supports a simple authentication flow and tab-based navigation, allowing users to manage tasks and view them across different pages. The app was developed as part of unit number IFN666 at QUT (Web and Mobile App Development).
 
-It demonstrates full-stack development skills by incorporating:
-- A mobile client that uses modern JavaScript (ES6+), React functional components, and hooks.
-- A RESTful API that uses GET, POST, PUT, and DELETE to interact with a MySQL database.
-- Support for persistent accessibility settings (e.g., font size).
-- Basic app screens including Splash, Login/Signup, About, and Settings, as per the assignment requirements.
+The backend, built with Node.js and Express, handles user authentication and task management using a RESTful API connected to a MySQL database.
+
+This project demonstrates cross-platform development and full-stack integration using modern web and mobile technologies.
  
 ---
 
@@ -23,56 +21,58 @@ It demonstrates full-stack development skills by incorporating:
 
 ---
 
+## 🛠 Backend Overview
+
+The backend server is built with Node.js and Express and interacts with a MySQL database. It includes:
+- Secure user authentication (with encrypted passwords)
+- Task CRUD operations using RESTful endpoints (GET, POST, PUT, DELETE)
+- Middleware for request validation and error handling
+
+---
+
 ## ⚙️ Tech Stack
 
+**Frontend:**
 - React Native (via Expo)
 - Expo Router
 - React Navigation
 - React Context API
 - Expo Fonts & Vector Icons
 
+**Backend:**
+- Node.js & Express
+- MySQL
+
 ---
 
 ## 🚀 Getting Started
 
-### Dependencies
-
-- `react-navigation` and related packages for navigation.
-- `expo` for development and building the app.
-- `react-native` for building the user interface.
-- `react-native-vector-icons` for using icons in the tab navigation.
-- `@fortawesome/react-native-fontawesome` for font awesome icons.
-- `expo-font` for custom fonts.
-- `expo-splash-screen` for managing the splash screen.
-
 ### Installation
 
 1. **Clone the repository:**
-
-   ```bash
-   git clone https://github.com/valenwhite/done_app.git
-   cd your-repo
-   ```
+```bash
+git clone https://github.com/valenwhite/done_app.git
+cd done_app
+```
 
 2. **Install dependencies:**
-
-   ```bash
-   npm install
-   ```
+```bash
+npm install
+```
 
 3. **Start the application:**
+```bash
+expo start
+```
 
-   ```bash
-   expo start
-   ```
-You can scan the QR code with Expo Go on your phone or run the app in an emulator.
+Scan the QR code with Expo Go or run in a local emulator.
 
 ---
 
 ## 🧪 Development Notes
 
 - This project uses Expo SDK 51
-- FontAwesome icons will likely need to ne replaced with Expo-compatible vector icons when upgrading to Expo SDK 53
+- FontAwesome icons may need conversion for SDK 53 compatibility
 - Designed with extensibility in mind for future backend or task tracking features
 ---
 
@@ -152,3 +152,13 @@ DONE_APP/
 - **app/\_layout.js**: Root navigation logic that controls routing based on auth state
 - **app/tabs/\_layout.js**: Controls bottom tab navigation structure
 - **login.js / signup.js**: Handle user authentication screens
+
+---
+
+## 🪪 License
+
+This project is licensed under the [MIT License](LICENSE.txt).
+
+---
+
+> Developed for educational purposes as part of QUT's IFN666 Web and Mobile App Development unit.
