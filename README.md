@@ -27,28 +27,6 @@
 
 ---
 
-## 📂 Folder Structure
-
-```
-/app
-  /tabs
-    index.js          # Home Screen
-    calendar.js       # Calendar Screen
-    profile.js        # Profile Screen
-    _layout.js        # Tab Navigator Layout
-  login.js            # Login Screen
-  signup.js           # Signup Screen
-  _layout.js          # Root Navigator Layout
-/authcontext.js       # Authentication Context and Provider
-```
-
-- **authcontext.js**: Manages global authentication state and session logic
-- **app/\_layout.js**: Root navigation logic that controls routing based on auth state
-- **app/tabs/\_layout.js**: Controls bottom tab navigation structure
-- **login.js / signup.js**: Handle user authentication screens
-
----
-
 ## 🚀 Getting Started
 
 ### Dependencies
@@ -117,3 +95,54 @@ Please include:
 You can open issues [here](https://github.com/valenwhite/done_app/issues).
 
 ---
+
+
+## 📂 Folder Structure
+
+```
+DONE_APP/
+├── Frontend/
+│   ├── app/
+│   │   ├── (tabs)/
+│   │   │   ├── index.js
+│   │   │   ├── profile.js
+│   │   │   ├── _layout.js
+│   │   │   ├── login.js
+│   │   │   └── signup.js
+│   │   └── assets/
+│   │       ├── fonts/
+│   │       └── images/
+│   ├── components/
+│   │   └── navigation/
+│   │       ├── TabBarIcon.tsx
+│   │       ├── HelloWave.tsx
+│   │       ├── Task.js
+│   │       ├── TaskBottomSheet.js
+│   │       ├── ThemedText.js
+│   │       └── ThemedView.js
+│   ├── constants/
+│   │   └── Colors.ts
+│   ├── contexts/
+│   │   └── TasksContext.js
+│   ├── hooks/
+│   │   ├── useColorScheme.ts
+│   │   ├── useColorScheme.web.ts
+│   │   └── useThemeColor.ts
+│   ├── ios/
+│   ├── scripts/
+│   │   └── reset-project.js
+│   ├── .gitignore
+│   ├── app.json
+│   ├── AuthContext.js
+│   ├── babel.config.js
+│   ├── expo-env.d.ts
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── README.md
+```
+
+- **authcontext.js**: Manages global authentication state and session logic
+- **app/\_layout.js**: Root navigation logic that controls routing based on auth state
+- **app/tabs/\_layout.js**: Controls bottom tab navigation structure
+- **login.js / signup.js**: Handle user authentication screens
