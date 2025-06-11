@@ -6,10 +6,10 @@
 **Done** is a mobile task management app built with React Native using Expo. It supports a simple authentication flow and tab-based navigation, allowing users to manage tasks and view them across different pages. The app was developed as part of unit number IFN666 at QUT (Web and Mobile App Development).
 
 It demonstrates full-stack development skills by incorporating:
-	•	A mobile client that uses modern JavaScript (ES6+), React functional components, and hooks.
-	•	A RESTful API that uses GET, POST, PUT, and DELETE to interact with a MySQL database.
-	•	Support for persistent accessibility settings (e.g., font size).
-	•	Basic app screens including Splash, Login/Signup, About, and Settings, as per the assignment requirements.
+- A mobile client that uses modern JavaScript (ES6+), React functional components, and hooks.
+- A RESTful API that uses GET, POST, PUT, and DELETE to interact with a MySQL database.
+- Support for persistent accessibility settings (e.g., font size).
+- Basic app screens including Splash, Login/Signup, About, and Settings, as per the assignment requirements.
  
 ---
 
