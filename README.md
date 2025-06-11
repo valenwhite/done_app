@@ -3,7 +3,7 @@
 
 ## Purpose of the Application
 
-**Dne** is a mobile task management app built with React Native using Expo. It supports a simple authentication flow and tab-based navigation, allowing users to manage tasks and view them across different pages. The app was developed as part of unit number IFN666 at QUT (Mobile and App Development) and demonstrates the use of authentication context, custom navigation, and modular architecture.
+**Done** is a mobile task management app built with React Native using Expo. It supports a simple authentication flow and tab-based navigation, allowing users to manage tasks and view them across different pages. The app was developed as part of unit number IFN666 at QUT (Mobile and App Development) and demonstrates the use of authentication context, custom navigation, and modular architecture.
 
 ---
 
